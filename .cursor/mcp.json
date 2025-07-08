@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "bunx",
+      "args": ["@modelcontextprotocol/server-filesystem", "./"]
+    },
+    "language-server": {
+      "command": "/mcp-language-server",
+      "args": [
+        "--workspace",
+        "/Users/jacob.lecoq.ext/Projects/debt-tracker",
+        "--lsp",
+        "typescript-language-server",
+        "--",
+        "--stdio"
+      ]
+    }
+  }
+}
