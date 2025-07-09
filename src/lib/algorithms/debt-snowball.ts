@@ -1,4 +1,4 @@
-import type { Debt } from "~/types";
+import type { Debt } from "~/types/db.helpers";
 import type {
   DebtPayoffProjection,
   PaymentRecommendation,
@@ -36,7 +36,7 @@ export interface SnowballResult {
  */
 export function calculateDebtSnowball(
   debts: Debt[],
-  monthlyBudget: number
+  monthlyBudget: number,
 ): SnowballResult {
   if (debts.length === 0) {
     return {
@@ -56,16 +56,20 @@ export function calculateDebtSnowball(
   // Calculate total minimum payments
   const totalMinimumPayments = sortedDebts.reduce(
     (sum, debt) => sum + debt.minimumPayment,
-    0
+    0,
   );
 
   if (monthlyBudget < totalMinimumPayments) {
     throw new Error(
-      `Monthly budget ($${monthlyBudget.toFixed(
-        2
-      )}) is less than total minimum payments ($${totalMinimumPayments.toFixed(
-        2
-      )})`
+      `Monthly budget ($${
+        monthlyBudget.toFixed(
+          2,
+        )
+      }) is less than total minimum payments ($${
+        totalMinimumPayments.toFixed(
+          2,
+        )
+      })`,
     );
   }
 
@@ -76,11 +80,11 @@ export function calculateDebtSnowball(
     (debt, index) => ({
       debtId: debt.id,
       debtName: debt.name,
-      recommendedPayment:
-        debt.minimumPayment + (index === 0 ? extraPayment : 0),
+      recommendedPayment: debt.minimumPayment +
+        (index === 0 ? extraPayment : 0),
       isMinimumPayment: index !== 0,
       priorityRank: index + 1,
-    })
+    }),
   );
 
   // Calculate detailed projections with month-by-month breakdown
@@ -139,17 +143,17 @@ function simulateSnowballPayments(sortedDebts: Debt[], monthlyBudget: number) {
     // First, pay minimum payments on all remaining debts
     for (const debt of workingDebts) {
       if (debt.remainingBalance > 0) {
-        const interestCharge =
-          (debt.remainingBalance * debt.interestRate) / 100 / 12;
+        const interestCharge = (debt.remainingBalance * debt.interestRate) /
+          100 / 12;
         const minimumPayment = Math.min(
           debt.minimumPayment,
-          debt.remainingBalance + interestCharge
+          debt.remainingBalance + interestCharge,
         );
 
         debt.totalInterestPaid += interestCharge;
         debt.remainingBalance = Math.max(
           0,
-          debt.remainingBalance + interestCharge - minimumPayment
+          debt.remainingBalance + interestCharge - minimumPayment,
         );
         remainingBudget -= minimumPayment;
 
@@ -180,13 +184,13 @@ function simulateSnowballPayments(sortedDebts: Debt[], monthlyBudget: number) {
       if (targetDebt) {
         const extraPayment = Math.min(
           remainingBudget,
-          targetDebt.remainingBalance
+          targetDebt.remainingBalance,
         );
         targetDebt.remainingBalance -= extraPayment;
 
         // Update the payment in monthPayments
         const paymentRecord = monthPayments.find(
-          (p) => p.debtId === targetDebt.id
+          (p) => p.debtId === targetDebt.id,
         );
         if (paymentRecord) {
           paymentRecord.payment += extraPayment;
@@ -208,7 +212,7 @@ function simulateSnowballPayments(sortedDebts: Debt[], monthlyBudget: number) {
     }
 
     const debtsRemaining = workingDebts.filter(
-      (debt) => debt.remainingBalance > 0
+      (debt) => debt.remainingBalance > 0,
     ).length;
 
     monthlyBreakdown.push({
@@ -243,7 +247,7 @@ function simulateSnowballPayments(sortedDebts: Debt[], monthlyBudget: number) {
 
   const totalInterestPaid = workingDebts.reduce(
     (sum, debt) => sum + debt.totalInterestPaid,
-    0
+    0,
   );
 
   return {

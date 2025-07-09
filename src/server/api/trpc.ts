@@ -144,3 +144,8 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
+export type ProtectedTRPCContext = TRPCContext & {
+  userId: NonNullable<TRPCContext["userId"]>;
+};

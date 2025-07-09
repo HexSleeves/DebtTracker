@@ -1,16 +1,182 @@
 import type { Database } from "./database.types";
 
-export type PaymentInsert = Database["public"]["Tables"]["payments"]["Insert"];
-export type PaymentUpdate = Database["public"]["Tables"]["payments"]["Update"];
-export type PaymentRow = Database["public"]["Tables"]["payments"]["Row"];
+// Database table type aliases for easier usage
+export type DbTables = Database["public"]["Tables"];
 
-export type PaymentPlanInsert =
-  Database["public"]["Tables"]["payment_plans"]["Insert"];
-export type PaymentPlanUpdate =
-  Database["public"]["Tables"]["payment_plans"]["Update"];
-export type PaymentPlanRow =
-  Database["public"]["Tables"]["payment_plans"]["Row"];
+// Debt types
+export type DebtRow = DbTables["debts"]["Row"];
+export type DebtInsert = DbTables["debts"]["Insert"];
+export type DebtUpdate = DbTables["debts"]["Update"];
 
-export type DebtInsert = Database["public"]["Tables"]["debts"]["Insert"];
-export type DebtUpdate = Database["public"]["Tables"]["debts"]["Update"];
-export type DebtRow = Database["public"]["Tables"]["debts"]["Row"];
+// Payment types
+export type PaymentRow = DbTables["payments"]["Row"];
+export type PaymentInsert = DbTables["payments"]["Insert"];
+export type PaymentUpdate = DbTables["payments"]["Update"];
+
+// Payment Plan types
+export type PaymentPlanRow = DbTables["payment_plans"]["Row"];
+export type PaymentPlanInsert = DbTables["payment_plans"]["Insert"];
+export type PaymentPlanUpdate = DbTables["payment_plans"]["Update"];
+
+// User types
+export type UserRow = DbTables["users"]["Row"];
+export type UserInsert = DbTables["users"]["Insert"];
+export type UserUpdate = DbTables["users"]["Update"];
+
+// Application-friendly type transformations
+// These transform database types (snake_case, string dates) to application types (camelCase, Date objects)
+
+export interface Debt {
+  id: string;
+  userId: string;
+  name: string;
+  type: string;
+  balance: number;
+  interestRate: number;
+  minimumPayment: number;
+  dueDate: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Payment {
+  id: string;
+  debtId: string;
+  amount: number;
+  paymentDate: Date;
+  type: string;
+  createdAt: Date;
+}
+
+export interface PaymentPlan {
+  id: string;
+  userId: string;
+  name: string;
+  strategy: string;
+  monthlyBudget: number;
+  extraPayment: number;
+  targetDate: Date | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface User {
+  id: string;
+  clerkUserId: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Transformation utilities
+export function transformDebtFromDb(dbDebt: DebtRow): Debt {
+  return {
+    id: dbDebt.id,
+    userId: dbDebt.user_id,
+    name: dbDebt.name,
+    type: dbDebt.type,
+    balance: Number(dbDebt.balance),
+    interestRate: Number(dbDebt.interest_rate),
+    minimumPayment: Number(dbDebt.minimum_payment),
+    dueDate: dbDebt.due_date ? new Date(dbDebt.due_date) : null,
+    createdAt: new Date(dbDebt.created_at || new Date().toISOString()),
+    updatedAt: new Date(dbDebt.updated_at || new Date().toISOString()),
+  };
+}
+
+export function transformPaymentFromDb(dbPayment: PaymentRow): Payment {
+  return {
+    id: dbPayment.id,
+    debtId: dbPayment.debt_id,
+    amount: Number(dbPayment.amount),
+    paymentDate: new Date(dbPayment.payment_date),
+    type: dbPayment.type,
+    createdAt: new Date(dbPayment.created_at || new Date().toISOString()),
+  };
+}
+
+export function transformPaymentPlanFromDb(
+  dbPlan: PaymentPlanRow,
+): PaymentPlan {
+  return {
+    id: dbPlan.id,
+    userId: dbPlan.user_id,
+    name: dbPlan.name,
+    strategy: dbPlan.strategy,
+    monthlyBudget: Number(dbPlan.monthly_budget),
+    extraPayment: Number(dbPlan.extra_payment),
+    targetDate: dbPlan.target_date ? new Date(dbPlan.target_date) : null,
+    isActive: dbPlan.is_active ?? false,
+    createdAt: new Date(dbPlan.created_at || new Date().toISOString()),
+    updatedAt: new Date(dbPlan.updated_at || new Date().toISOString()),
+  };
+}
+
+export function transformUserFromDb(dbUser: UserRow): User {
+  return {
+    id: dbUser.id,
+    clerkUserId: dbUser.clerk_user_id,
+    email: dbUser.email,
+    createdAt: new Date(dbUser.created_at || new Date().toISOString()),
+    updatedAt: new Date(dbUser.updated_at || new Date().toISOString()),
+  };
+}
+
+// Input types for API operations
+export interface CreateDebtInput {
+  name: string;
+  type: "credit_card" | "loan" | "mortgage" | "other";
+  balance: number;
+  interestRate: number;
+  minimumPayment: number;
+  dueDate?: Date;
+}
+
+export interface UpdateDebtInput {
+  id: string;
+  name?: string;
+  type?: "credit_card" | "loan" | "mortgage" | "other";
+  balance?: number;
+  interestRate?: number;
+  minimumPayment?: number;
+  dueDate?: Date | null;
+}
+
+export interface CreatePaymentInput {
+  debtId: string;
+  amount: number;
+  paymentDate: Date;
+  type: "minimum" | "extra" | "full";
+}
+
+export interface UpdatePaymentInput {
+  id: string;
+  amount?: number;
+  paymentDate?: Date;
+  type?: "minimum" | "extra" | "full";
+}
+
+export interface CreatePaymentPlanInput {
+  name: string;
+  strategy: "avalanche" | "snowball" | "custom";
+  monthlyBudget: number;
+  extraPayment: number;
+  targetDate?: Date;
+  isActive?: boolean;
+}
+
+export interface UpdatePaymentPlanInput {
+  id: string;
+  name?: string;
+  strategy?: "avalanche" | "snowball" | "custom";
+  monthlyBudget?: number;
+  extraPayment?: number;
+  targetDate?: Date | null;
+  isActive?: boolean;
+}
+
+export interface CreateUserInput {
+  clerkUserId: string;
+  email: string;
+}

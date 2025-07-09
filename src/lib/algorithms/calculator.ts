@@ -8,7 +8,7 @@ import {
   subtractCurrency,
   sumCurrency,
 } from "~/lib/currency";
-import type { Debt } from "~/types";
+import type { Debt } from "~/types/db.helpers";
 import { calculateDebtAvalanche } from "./debt-avalanche";
 import { calculateDebtSnowball } from "./debt-snowball";
 
@@ -40,21 +40,20 @@ export interface StrategyComparison {
  */
 export function compareStrategies(
   debts: Debt[],
-  monthlyBudget: number
+  monthlyBudget: number,
 ): StrategyComparison {
   const avalancheResult = calculateDebtAvalanche(debts, monthlyBudget);
   const snowballResult = calculateDebtSnowball(debts, monthlyBudget);
 
-  const interestSavingsWithAvalanche =
-    snowballResult.totalInterestPaid - avalancheResult.totalInterestSaved;
+  const interestSavingsWithAvalanche = snowballResult.totalInterestPaid -
+    avalancheResult.totalInterestSaved;
 
-  const timeSavingsWithAvalanche =
-    snowballResult.totalMonthsToDebtFree -
+  const timeSavingsWithAvalanche = snowballResult.totalMonthsToDebtFree -
     avalancheResult.totalMonthsToDebtFree;
 
   const motivationalBenefitOfSnowball =
     snowballResult.debtsEliminatedByMonth.filter(
-      (elimination) => elimination.month <= 12
+      (elimination) => elimination.month <= 12,
     ).length;
 
   return {
@@ -90,7 +89,7 @@ export function calculateTotalMinimumPayments(debts: Debt[]): number {
  */
 export function calculateDebtToIncomeRatio(
   debts: Debt[],
-  monthlyIncome: number
+  monthlyIncome: number,
 ): number {
   const balances = debts.map((debt) => debt.balance);
   const totalDebt = getCurrencyValue(sumCurrency(balances));
@@ -110,7 +109,7 @@ export function calculateWeightedAverageInterestRate(debts: Debt[]): number {
 
   const weightedSum = debts.reduce((sum, debt) => {
     const weightedRate = getCurrencyValue(
-      multiplyCurrency(debt.balance, debt.interestRate)
+      multiplyCurrency(debt.balance, debt.interestRate),
     );
     return getCurrencyValue(addCurrency(sum, weightedRate));
   }, 0);
@@ -123,7 +122,7 @@ export function calculateWeightedAverageInterestRate(debts: Debt[]): number {
  */
 export function calculateExtraPayment(
   debts: Debt[],
-  monthlyBudget: number
+  monthlyBudget: number,
 ): number {
   const totalMinimumPayments = calculateTotalMinimumPayments(debts);
   return Math.max(0, monthlyBudget - totalMinimumPayments);
@@ -149,20 +148,20 @@ export function estimateMinimumPaymentTimeline(debts: Debt[]): {
       // 50 years max
       const interestCharge = divideCurrency(
         divideCurrency(multiplyCurrency(balance, debt.interestRate), 100),
-        12
+        12,
       );
 
       const balanceWithInterest = addCurrency(balance, interestCharge);
       const payment = createCurrency(
-        Math.min(debt.minimumPayment, getCurrencyValue(balanceWithInterest))
+        Math.min(debt.minimumPayment, getCurrencyValue(balanceWithInterest)),
       );
 
       interestPaid = addCurrency(interestPaid, interestCharge);
       balance = createCurrency(
         Math.max(
           0,
-          getCurrencyValue(subtractCurrency(balanceWithInterest, payment))
-        )
+          getCurrencyValue(subtractCurrency(balanceWithInterest, payment)),
+        ),
       );
       months++;
     }
@@ -187,7 +186,7 @@ export function estimateMinimumPaymentTimeline(debts: Debt[]): {
 export function calculateBudgetImpact(
   debts: Debt[],
   currentBudget: number,
-  increasedBudget: number
+  increasedBudget: number,
 ): {
   monthsSaved: number;
   interestSaved: number;
@@ -196,10 +195,10 @@ export function calculateBudgetImpact(
   const currentResult = calculateDebtAvalanche(debts, currentBudget);
   const increasedResult = calculateDebtAvalanche(debts, increasedBudget);
 
-  const monthsSaved =
-    currentResult.totalMonthsToDebtFree - increasedResult.totalMonthsToDebtFree;
-  const interestSaved =
-    currentResult.totalInterestSaved - increasedResult.totalInterestSaved;
+  const monthsSaved = currentResult.totalMonthsToDebtFree -
+    increasedResult.totalMonthsToDebtFree;
+  const interestSaved = currentResult.totalInterestSaved -
+    increasedResult.totalInterestSaved;
   const percentageImprovement =
     (monthsSaved / currentResult.totalMonthsToDebtFree) * 100;
 
@@ -233,8 +232,9 @@ export function formatTimeToDebtFree(months: number): string {
   }
 
   const yearText = years === 1 ? "1 year" : `${years} years`;
-  const monthText =
-    remainingMonths === 1 ? "1 month" : `${remainingMonths} months`;
+  const monthText = remainingMonths === 1
+    ? "1 month"
+    : `${remainingMonths} months`;
 
   return `${yearText} and ${monthText}`;
 }

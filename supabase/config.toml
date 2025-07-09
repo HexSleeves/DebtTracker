@@ -286,7 +286,7 @@ enabled = false
 # Use Clerk as a third-party provider alongside Supabase Auth.
 [auth.third_party.clerk]
 enabled = true
-domain  = "https://workable-kodiak-22.clerk.accounts.dev"
+domain  = "workable-kodiak-22.clerk.accounts.dev"
 
 [edge_runtime]
 enabled = true
