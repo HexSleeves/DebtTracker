@@ -5,7 +5,7 @@
       "args": ["@modelcontextprotocol/server-filesystem", "./"]
     },
     "language-server": {
-      "command": "/mcp-language-server",
+      "command": "mcp-language-server",
       "args": [
         "--workspace",
         "/Users/jacob.lecoq.ext/Projects/debt-tracker",

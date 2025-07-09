@@ -1,8 +1,7 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(ls:*)"
-    ],
+    "allow": ["Bash(ls:*)"],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": ["filesystem", "language-server"]
 }
