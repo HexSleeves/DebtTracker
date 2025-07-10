@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { env } from "~/env";
+import { ErrorBoundary } from "../components/error-boundary";
 import { PerformanceMonitor } from "../components/performance-monitor";
 import { ThemeProvider } from "../components/theme-provider";
 import { SiteConfig } from "../config/site";
@@ -38,14 +39,35 @@ export default function RootLayout({
 			className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 		>
 			<body className="overflow-x-hidden">
-				<ThemeProvider>
-					<ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-						<TRPCReactProvider>
-							{children}
-							<PerformanceMonitor />
-						</TRPCReactProvider>
-					</ClerkProvider>
-				</ThemeProvider>
+				<ErrorBoundary
+					resetOnPropsChange={true}
+					// onError={(error, errorInfo) => {
+					// 	// Log errors to console in development
+					// 	if (process.env.NODE_ENV === "development") {
+					// 		console.error("Root Error Boundary:", error, errorInfo);
+					// 	}
+					// 	// In production, you might want to send errors to a service like Sentry
+					// 	// Example: Sentry.captureException(error, { extra: { errorInfo } });
+					// }}
+				>
+					<ThemeProvider>
+						<ClerkProvider
+							publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+						>
+							<ErrorBoundary
+								resetOnPropsChange={true}
+								// onError={(error, errorInfo) => {
+								// 	console.error("tRPC Error Boundary:", error, errorInfo);
+								// }}
+							>
+								<TRPCReactProvider>
+									{children}
+									<PerformanceMonitor />
+								</TRPCReactProvider>
+							</ErrorBoundary>
+						</ClerkProvider>
+					</ThemeProvider>
+				</ErrorBoundary>
 			</body>
 		</html>
 	);
