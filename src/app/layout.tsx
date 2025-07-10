@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { env } from "~/env";
+import { PerformanceMonitor } from "../components/performance-monitor";
 import { ThemeProvider } from "../components/theme-provider";
 import { SiteConfig } from "../config/site";
 import { TRPCReactProvider } from "../trpc/react";
@@ -39,7 +40,10 @@ export default function RootLayout({
 			<body className="overflow-x-hidden">
 				<ThemeProvider>
 					<ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-						<TRPCReactProvider>{children}</TRPCReactProvider>
+						<TRPCReactProvider>
+							{children}
+							<PerformanceMonitor />
+						</TRPCReactProvider>
 					</ClerkProvider>
 				</ThemeProvider>
 			</body>

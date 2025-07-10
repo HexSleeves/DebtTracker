@@ -2,33 +2,94 @@
 
 import { motion } from "framer-motion";
 import { Calendar, CreditCard, DollarSign, TrendingDown } from "lucide-react";
+import { memo, useMemo } from "react";
+import { useRenderTime } from "~/components/performance-monitor";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/trpc/react";
 
-export function DashboardOverview() {
-	const { data: debts, isLoading } = api.debt.getAll.useQuery();
+export const DashboardOverview = memo(function DashboardOverview() {
+	useRenderTime("DashboardOverview");
 
-	const containerVariants = {
-		hidden: { opacity: 0 },
-		visible: {
-			opacity: 1,
-			transition: {
-				staggerChildren: 0.1,
-			},
-		},
-	};
+	const { data: debts, isLoading } = api.debt.getAll.useQuery(undefined, {
+		// Enhanced caching for dashboard data
+		staleTime: 2 * 60 * 1000, // 2 minutes
+		gcTime: 5 * 60 * 1000, // 5 minutes (was cacheTime)
+		refetchOnWindowFocus: true,
+		refetchOnReconnect: true,
+	});
 
-	const cardVariants = {
-		hidden: { opacity: 0, y: 20 },
-		visible: {
-			opacity: 1,
-			y: 0,
-			transition: {
-				duration: 0.4,
-				ease: [0.4, 0, 0.2, 1] as const,
+	// Memoize animation variants to prevent recreation on each render
+	const containerVariants = useMemo(
+		() => ({
+			hidden: { opacity: 0 },
+			visible: {
+				opacity: 1,
+				transition: {
+					staggerChildren: 0.1,
+				},
 			},
-		},
-	};
+		}),
+		[],
+	);
+
+	const cardVariants = useMemo(
+		() => ({
+			hidden: { opacity: 0, y: 20 },
+			visible: {
+				opacity: 1,
+				y: 0,
+				transition: {
+					duration: 0.4,
+					ease: [0.4, 0, 0.2, 1] as const,
+				},
+			},
+		}),
+		[],
+	);
+
+	// Memoize calculations to prevent unnecessary recalculations
+	const calculations = useMemo(() => {
+		if (!debts)
+			return {
+				totalDebt: 0,
+				totalMinimumPayment: 0,
+				averageInterestRate: 0,
+				upcomingPayments: 0,
+			};
+
+		const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+		const totalMinimumPayment = debts.reduce(
+			(sum, debt) => sum + debt.minimumPayment,
+			0,
+		);
+		const averageInterestRate = debts.length
+			? debts.reduce((sum, debt) => sum + debt.interestRate, 0) / debts.length
+			: 0;
+
+		const today = new Date();
+		const upcomingPayments = debts.filter((debt) => {
+			if (!debt.dueDate) return false;
+			const dueDate = new Date(debt.dueDate);
+			const daysDiff = Math.ceil(
+				(dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+			);
+			return daysDiff >= 0 && daysDiff <= 7;
+		}).length;
+
+		return {
+			totalDebt,
+			totalMinimumPayment,
+			averageInterestRate,
+			upcomingPayments,
+		};
+	}, [debts]);
+
+	const {
+		totalDebt,
+		totalMinimumPayment,
+		averageInterestRate,
+		upcomingPayments,
+	} = calculations;
 
 	if (isLoading) {
 		return (
@@ -39,7 +100,7 @@ export function DashboardOverview() {
 				animate="visible"
 			>
 				{["total-debt", "minimum-payment", "interest-rate", "due-week"].map(
-					(skeletonId, index) => (
+					(skeletonId, _index) => (
 						<motion.div key={skeletonId} variants={cardVariants}>
 							<Card className="animate-pulse">
 								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -59,23 +120,6 @@ export function DashboardOverview() {
 			</motion.div>
 		);
 	}
-
-	const totalDebt = debts?.reduce((sum, debt) => sum + debt.balance, 0) ?? 0;
-	const totalMinimumPayment =
-		debts?.reduce((sum, debt) => sum + debt.minimumPayment, 0) ?? 0;
-	const averageInterestRate = debts?.length
-		? debts.reduce((sum, debt) => sum + debt.interestRate, 0) / debts.length
-		: 0;
-	const upcomingPayments =
-		debts?.filter((debt) => {
-			if (!debt.dueDate) return false;
-			const today = new Date();
-			const dueDate = new Date(debt.dueDate);
-			const daysDiff = Math.ceil(
-				(dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
-			);
-			return daysDiff >= 0 && daysDiff <= 7;
-		}).length ?? 0;
 
 	return (
 		<motion.div
@@ -158,4 +202,4 @@ export function DashboardOverview() {
 			</motion.div>
 		</motion.div>
 	);
-}
+});

@@ -52,9 +52,14 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
 				httpBatchStreamLink({
 					transformer: SuperJSON,
 					url: `${getBaseUrl()}/api/trpc`,
+					// Enhanced batching configuration
+					maxURLLength: 2048,
+					maxItems: 10,
 					headers: () => {
 						const headers = new Headers();
 						headers.set("x-trpc-source", "nextjs-react");
+						// Add performance timing headers
+						headers.set("x-timestamp", Date.now().toString());
 						return headers;
 					},
 				}),
