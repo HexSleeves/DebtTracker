@@ -12,7 +12,7 @@ This document captures feedback from a senior Next.js 15 developer on enhancing 
 - **✅ Enhanced Theme System**: Updated `ThemeProvider` with better system preference detection and hydration handling
 - **✅ Accessibility Improvements**: Added comprehensive ARIA attributes to calendar, dialog, and popover components with proper date labeling and navigation
 - **✅ Responsive Design**: Audited dashboard components and integrated design system colors consistently across all components
-- **✅ Animations & Polish**: Integrated `framer-motion` with subtle transitions, stagger animations, and hover effects for better UX
+- **✅ Animations & Polish**: Integrated `motion` with subtle transitions, stagger animations, and hover effects for better UX
 - **✅ File Management**: Staged all untracked UI files (`calendar.tsx`, `dialog.tsx`, `popover.tsx`) and committed improvements
 
 ### Technical Details

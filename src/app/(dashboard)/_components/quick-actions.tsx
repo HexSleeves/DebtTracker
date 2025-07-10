@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CreditCard, DollarSign, Plus, TrendingUp } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import { DebtForm } from "~/components/forms/debt-form";

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Calendar, CreditCard, DollarSign, TrendingDown } from "lucide-react";
+import { motion } from "motion/react";
 import { memo, useMemo } from "react";
 import { useRenderTime } from "~/components/performance-monitor";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
