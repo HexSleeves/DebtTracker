@@ -2,9 +2,9 @@ import "~/styles/globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
 import { env } from "~/env";
+import { ThemeProvider } from "../components/theme-provider";
 import { SiteConfig } from "../config/site";
 import { TRPCReactProvider } from "../trpc/react";
 
@@ -37,12 +37,7 @@ export default function RootLayout({
 			className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 		>
 			<body className="overflow-x-hidden">
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="dark"
-					enableSystem
-					disableTransitionOnChange
-				>
+				<ThemeProvider>
 					<ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
 						<TRPCReactProvider>{children}</TRPCReactProvider>
 					</ClerkProvider>

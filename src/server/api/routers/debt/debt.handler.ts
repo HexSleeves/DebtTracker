@@ -93,8 +93,8 @@ export async function updateDebt({
 		dbUpdateData.minimum_payment = updateData.minimumPayment;
 	}
 	if (updateData.dueDate !== undefined) {
-		dbUpdateData.due_date = updateData.dueDate?.toISOString().split("T")[0] ||
-			null;
+		dbUpdateData.due_date =
+			updateData.dueDate?.toISOString().split("T")[0] || null;
 	}
 
 	const { data: debt, error } = await ctx.supabase
@@ -151,13 +151,15 @@ export async function getDebtStats({ ctx }: HandlerCtx) {
 		(sum, debt) => sum + Number(debt.minimum_payment),
 		0,
 	);
-	const averageInterestRate = debts.length > 0
-		? debts.reduce((sum, debt) => sum + Number(debt.interest_rate), 0) /
-			debts.length
-		: 0;
-	const highestInterestRate = debts.length > 0
-		? Math.max(...debts.map((debt) => Number(debt.interest_rate)))
-		: 0;
+	const averageInterestRate =
+		debts.length > 0
+			? debts.reduce((sum, debt) => sum + Number(debt.interest_rate), 0) /
+				debts.length
+			: 0;
+	const highestInterestRate =
+		debts.length > 0
+			? Math.max(...debts.map((debt) => Number(debt.interest_rate)))
+			: 0;
 
 	return {
 		totalDebts: debts.length,

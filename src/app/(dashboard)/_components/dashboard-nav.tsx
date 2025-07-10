@@ -1,6 +1,11 @@
 "use client";
 
-import { Dialog, Transition, TransitionChild } from "@headlessui/react";
+import {
+	Dialog,
+	DialogPanel,
+	Transition,
+	TransitionChild,
+} from "@headlessui/react";
 import { CreditCard, Home, PiggyBank, TrendingUp, User, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,11 +32,11 @@ export function DashboardNav({
 	const pathname = usePathname();
 
 	const NavContent = () => (
-		<div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+		<div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background px-6 pb-4">
 			<div className="flex h-16 shrink-0 items-center">
-				<h1 className="font-bold text-gray-900 text-xl">Debt Manager</h1>
+				<h1 className="font-bold text-foreground text-xl">Debt Manager</h1>
 			</div>
-			<nav className="flex flex-1 flex-col">
+			<nav className="flex flex-1 flex-col" aria-label="Main navigation">
 				<ul className="flex flex-1 flex-col gap-y-7">
 					<li>
 						<ul className="-mx-2 space-y-1">
@@ -41,17 +46,18 @@ export function DashboardNav({
 										href={item.href}
 										className={cn(
 											pathname === item.href
-												? "bg-gray-50 text-indigo-600"
-												: "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-											"group flex gap-x-3 rounded-md p-2 font-semibold text-sm leading-6",
+												? "bg-primary text-primary-foreground"
+												: "text-foreground hover:bg-accent hover:text-accent-foreground",
+											"group flex gap-x-3 rounded-md p-2 font-semibold text-sm leading-6 transition-colors",
 										)}
 										onClick={() => setSidebarOpen(false)}
+										aria-current={pathname === item.href ? "page" : undefined}
 									>
 										<item.icon
 											className={cn(
 												pathname === item.href
-													? "text-indigo-600"
-													: "text-gray-400 group-hover:text-indigo-600",
+													? "text-primary-foreground"
+													: "text-muted-foreground group-hover:text-accent-foreground",
 												"h-6 w-6 shrink-0",
 											)}
 											aria-hidden="true"
@@ -85,7 +91,7 @@ export function DashboardNav({
 						leaveFrom="opacity-100"
 						leaveTo="opacity-0"
 					>
-						<div className="fixed inset-0 bg-gray-900/80" />
+						<div className="fixed inset-0 bg-black/80" />
 					</TransitionChild>
 
 					<div className="fixed inset-0 flex">
@@ -98,7 +104,7 @@ export function DashboardNav({
 							leaveFrom="translate-x-0"
 							leaveTo="-translate-x-full"
 						>
-							<Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
+							<DialogPanel className="relative mr-16 flex w-full max-w-xs flex-1">
 								<TransitionChild
 									as={Fragment}
 									enter="ease-in-out duration-300"
@@ -113,6 +119,7 @@ export function DashboardNav({
 											type="button"
 											className="-m-2.5 p-2.5"
 											onClick={() => setSidebarOpen(false)}
+											aria-label="Close sidebar"
 										>
 											<span className="sr-only">Close sidebar</span>
 											<X className="h-6 w-6 text-white" aria-hidden="true" />
@@ -120,7 +127,7 @@ export function DashboardNav({
 									</div>
 								</TransitionChild>
 								<NavContent />
-							</Dialog.Panel>
+							</DialogPanel>
 						</TransitionChild>
 					</div>
 				</Dialog>
@@ -128,7 +135,7 @@ export function DashboardNav({
 
 			{/* Desktop sidebar */}
 			<div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-				<div className="border-gray-200 border-r">
+				<div className="border-border border-r">
 					<NavContent />
 				</div>
 			</div>
