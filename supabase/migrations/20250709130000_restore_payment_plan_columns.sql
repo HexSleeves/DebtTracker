@@ -24,7 +24,7 @@ DROP INDEX IF EXISTS "public"."idx_payment_plans_active";
 
 -- Recreate indexes with the correct column name
 CREATE INDEX idx_payment_plans_is_active ON public.payment_plans USING btree (is_active);
-CREATE INDEX idx_active_payment_plans ON public.payment_plans USING btree (user_id, is_active) WHERE (is_active = true);
+CREATE INDEX idx_active_payment_plans ON public.payment_plans USING btree (clerk_user_id, is_active) WHERE (is_active = true);
 
 -- Add comments to document the restored columns
 COMMENT ON COLUMN payment_plans.name IS 'User-defined name for the payment plan';

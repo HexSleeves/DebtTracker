@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string;
+          query?: string;
           extensions?: Json;
           variables?: Json;
-          query?: string;
+          operationName?: string;
         };
         Returns: Json;
       };
@@ -37,6 +37,7 @@ export type Database = {
       debts: {
         Row: {
           balance: number;
+          clerk_user_id: string;
           created_at: string | null;
           due_date: string | null;
           id: string;
@@ -45,10 +46,10 @@ export type Database = {
           name: string;
           type: string;
           updated_at: string | null;
-          user_id: string;
         };
         Insert: {
           balance: number;
+          clerk_user_id?: string;
           created_at?: string | null;
           due_date?: string | null;
           id?: string;
@@ -57,10 +58,10 @@ export type Database = {
           name: string;
           type: string;
           updated_at?: string | null;
-          user_id: string;
         };
         Update: {
           balance?: number;
+          clerk_user_id?: string;
           created_at?: string | null;
           due_date?: string | null;
           id?: string;
@@ -69,20 +70,12 @@ export type Database = {
           name?: string;
           type?: string;
           updated_at?: string | null;
-          user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: "debts_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       payment_plans: {
         Row: {
+          clerk_user_id: string;
           created_at: string | null;
           extra_payment: number;
           id: string;
@@ -92,9 +85,9 @@ export type Database = {
           strategy: string;
           target_date: string | null;
           updated_at: string | null;
-          user_id: string;
         };
         Insert: {
+          clerk_user_id?: string;
           created_at?: string | null;
           extra_payment?: number;
           id?: string;
@@ -104,9 +97,9 @@ export type Database = {
           strategy: string;
           target_date?: string | null;
           updated_at?: string | null;
-          user_id: string;
         };
         Update: {
+          clerk_user_id?: string;
           created_at?: string | null;
           extra_payment?: number;
           id?: string;
@@ -116,17 +109,8 @@ export type Database = {
           strategy?: string;
           target_date?: string | null;
           updated_at?: string | null;
-          user_id?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: "payment_plans_user_id_fkey";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       payments: {
         Row: {
@@ -162,30 +146,6 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
-      };
-      users: {
-        Row: {
-          clerk_user_id: string;
-          created_at: string | null;
-          email: string;
-          id: string;
-          updated_at: string | null;
-        };
-        Insert: {
-          clerk_user_id: string;
-          created_at?: string | null;
-          email: string;
-          id?: string;
-          updated_at?: string | null;
-        };
-        Update: {
-          clerk_user_id?: string;
-          created_at?: string | null;
-          email?: string;
-          id?: string;
-          updated_at?: string | null;
-        };
-        Relationships: [];
       };
     };
     Views: {
@@ -302,7 +262,8 @@ export type CompositeTypes<
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database;
-  } ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]][
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]][
       "CompositeTypes"
     ]
     : never = never,

@@ -1,23 +1,20 @@
 import "~/styles/globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import { Geist, Geist_Mono } from "next/font/google";
+import { env } from "~/env";
+import { SiteConfig } from "../config/site";
 import { TRPCReactProvider } from "../trpc/react";
 
-export const viewport: Viewport = {
-	themeColor: "#3B82F6",
-	initialScale: 1,
-	maximumScale: 1,
-	userScalable: false,
-	viewportFit: "cover",
-	interactiveWidget: "resizes-content",
-};
-
 export const metadata: Metadata = {
+	title: {
+		default: SiteConfig.title,
+		template: `%s | ${SiteConfig.title}`,
+	},
+	description: SiteConfig.description,
 	icons: [{ rel: "icon", url: "/favicon.ico" }],
-	title: "Debt Manager - Take Control of Your Finances",
-	description: "Comprehensive debt management and repayment optimization tool",
 };
 
 const geistSans = Geist({
@@ -34,15 +31,23 @@ export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<ClerkProvider>
-			<html
-				lang="en"
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
-				<body>
-					<TRPCReactProvider>{children}</TRPCReactProvider>
-				</body>
-			</html>
-		</ClerkProvider>
+		<html
+			lang="en"
+			suppressHydrationWarning
+			className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+		>
+			<body className="overflow-x-hidden">
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="dark"
+					enableSystem
+					disableTransitionOnChange
+				>
+					<ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+						<TRPCReactProvider>{children}</TRPCReactProvider>
+					</ClerkProvider>
+				</ThemeProvider>
+			</body>
+		</html>
 	);
 }

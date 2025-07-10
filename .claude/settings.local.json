@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(ls:*)"],
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(supabase db reset:*)",
+      "Bash(npx shadcn@latest add *)"
+    ],
     "deny": []
   },
   "enabledMcpjsonServers": ["filesystem", "language-server"]

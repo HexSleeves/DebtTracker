@@ -28,7 +28,7 @@ This document breaks down the PRD requirements into actionable development tasks
 
 ### Debt CRUD Operations
 
-- [ ] **HIGH** - Create tRPC router for debt operations
+- [x] **HIGH** - Create tRPC router for debt operations
 - [ ] **HIGH** - Implement "Add Debt" form with validation (DT-01, DT-02)
   - Support multiple debt types (credit card, personal loan, mortgage, etc.)
   - Fields: balance, APR, minimum payment, due date
@@ -102,8 +102,8 @@ This document breaks down the PRD requirements into actionable development tasks
 
 ### API Development
 
-- [ ] **HIGH** - Set up tRPC routers for all debt operations
-- [ ] **HIGH** - Implement error handling and validation
+- [x] **HIGH** - Set up tRPC routers for all debt operations
+- [x] **HIGH** - Implement error handling and validation
 - [ ] **HIGH** - Add API rate limiting and security measures
 - [ ] **HIGH** - Create comprehensive API documentation
 - [ ] **MEDIUM** - Add API response caching where appropriate
@@ -153,8 +153,8 @@ This document breaks down the PRD requirements into actionable development tasks
 
 ### Code Quality
 
-- [ ] **HIGH** - Configure Biome linting rules
-- [ ] **HIGH** - Set up TypeScript strict mode
+- [x] **HIGH** - Configure Biome linting rules
+- [x] **HIGH** - Set up TypeScript strict mode
 - [ ] **HIGH** - Add pre-commit hooks for code quality
 - [ ] **MEDIUM** - Implement code coverage reporting
 
