@@ -4,10 +4,9 @@ import {
 	UpcomingPaymentsSkeleton,
 } from "~/components/suspense-wrapper";
 import { api, HydrateClient } from "~/trpc/server";
-import { DebtTable, DebtTableSkeleton } from "../_components/debt-table";
-import { QuickActions } from "../_components/quick-actions";
-import { DashboardQuickPreview } from "../_components/quick-preview";
-import { UpcomingPayments } from "../_components/upcoming-payments";
+import { QuickActions } from "./_components/quick-actions";
+import { DashboardQuickPreview } from "./_components/quick-preview";
+import { UpcomingPayments } from "./_components/upcoming-payments";
 
 // Separate component for prefetching to enable streaming
 async function DashboardQuickPreviewWithData() {
@@ -20,12 +19,6 @@ async function UpcomingPaymentsWithData() {
 	// Prefetch debt data for upcoming payments
 	void api.debt.getAll.prefetch();
 	return <UpcomingPayments />;
-}
-
-async function DebtTableWithData() {
-	// Prefetch debt data for upcoming payments
-	void api.debt.getAll.prefetch();
-	return <DebtTable />;
 }
 
 export default async function DashboardPage() {
@@ -48,11 +41,6 @@ export default async function DashboardPage() {
 				{/* Stream upcoming payments */}
 				<Suspense fallback={<UpcomingPaymentsSkeleton />}>
 					<UpcomingPaymentsWithData />
-				</Suspense>
-
-				{/* Stream debt table */}
-				<Suspense fallback={<DebtTableSkeleton />}>
-					<DebtTableWithData />
 				</Suspense>
 			</div>
 

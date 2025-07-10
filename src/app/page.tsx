@@ -53,23 +53,23 @@ export default function LandingPage() {
 			</header>
 
 			{/* Hero Section */}
-			<section className="container py-24 md:py-32">
+			<section className="container mx-auto py-24 md:py-32">
 				<div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-					<div className="flex flex-col justify-center space-y-8">
+					<div className="flex flex-col justify-center space-y-8 text-center lg:text-left">
 						<div className="space-y-6">
-							<Badge variant="secondary" className="w-fit">
+							<Badge variant="secondary" className="mx-auto w-fit lg:mx-0">
 								✨ Smart Debt Management
 							</Badge>
 							<h1 className="font-bold text-4xl tracking-tight sm:text-5xl md:text-6xl">
 								Take Control of Your{" "}
 								<span className="text-primary">Debt Journey</span>
 							</h1>
-							<p className="max-w-[600px] text-muted-foreground text-xl">
+							<p className="mx-auto max-w-[600px] text-muted-foreground text-xl lg:mx-0">
 								{SiteConfig.description}. Track, optimize, and eliminate debt
 								with intelligent strategies tailored to your financial goals.
 							</p>
 						</div>
-						<div className="flex flex-col gap-4 min-[400px]:flex-row">
+						<div className="flex flex-col justify-center gap-4 lg:justify-start min-[400px]:flex-row">
 							<Button size="lg" asChild>
 								<Link href="/dashboard">
 									Start Managing Debt
@@ -80,7 +80,7 @@ export default function LandingPage() {
 								<Link href="#features">Learn More</Link>
 							</Button>
 						</div>
-						<div className="flex items-center space-x-8 text-muted-foreground text-sm">
+						<div className="flex flex-wrap items-center justify-center gap-4 text-muted-foreground text-sm lg:justify-start lg:gap-8">
 							<div className="flex items-center">
 								<CheckCircle className="mr-2 h-4 w-4 text-green-600" />
 								Free to use
@@ -169,7 +169,7 @@ export default function LandingPage() {
 			</section>
 
 			{/* Features Section */}
-			<section id="features" className="container py-24 md:py-32">
+			<section id="features" className="container mx-auto py-24 md:py-32">
 				<div className="mx-auto max-w-5xl">
 					<div className="mb-16 space-y-4 text-center">
 						<h2 className="font-bold text-3xl tracking-tight sm:text-4xl">
@@ -264,7 +264,7 @@ export default function LandingPage() {
 			</section>
 
 			{/* CTA Section */}
-			<section className="container py-24 md:py-32">
+			<section className="container mx-auto py-24 md:py-32">
 				<div className="mx-auto max-w-2xl text-center">
 					<div className="space-y-6">
 						<h2 className="font-bold text-3xl tracking-tight sm:text-4xl">
@@ -288,7 +288,7 @@ export default function LandingPage() {
 
 			{/* Footer */}
 			<footer className="border-t bg-muted/50">
-				<div className="container py-8 md:py-12">
+				<div className="container mx-auto py-8 md:py-12">
 					<div className="flex flex-col items-center justify-between gap-4 md:flex-row">
 						<div className="flex items-center space-x-2">
 							<DollarSign className="h-5 w-5 text-primary" />
