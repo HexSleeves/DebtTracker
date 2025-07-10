@@ -23,9 +23,10 @@ export const createQueryClient = () =>
 				// Refetch on window focus for critical data
 				refetchOnWindowFocus: (query) => {
 					// Only refetch debt-related queries on window focus
-					return query.queryKey.some((key) =>
-						typeof key === "string" &&
-						["debt", "payment", "paymentPlan"].includes(key)
+					return query.queryKey.some(
+						(key) =>
+							typeof key === "string" &&
+							["debt", "payment", "paymentPlan"].includes(key),
 					);
 				},
 				refetchOnReconnect: true,

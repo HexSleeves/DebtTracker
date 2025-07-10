@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { DashboardLayoutClient } from "./_components/dashboard-layout-client";
+import { DashboardLayoutClient } from "./_components/layout/dashboard-layout-client";
 
 export default async function DashboardLayout({
 	children,

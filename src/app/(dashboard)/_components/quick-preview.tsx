@@ -5,10 +5,12 @@ import { motion } from "motion/react";
 import { memo, useMemo } from "react";
 import { useRenderTime } from "~/components/performance-monitor";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { formatCurrency } from "~/lib/currency";
+import { useDebtMetrics } from "~/lib/hooks/use-debt-strategy";
 import { api } from "~/trpc/react";
 
-export const DashboardOverview = memo(function DashboardOverview() {
-	useRenderTime("DashboardOverview");
+export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
+	useRenderTime("DashboardQuickPreview");
 
 	const { data: debts, isLoading } = api.debt.getAll.useQuery(undefined, {
 		// Enhanced caching for dashboard data
@@ -47,27 +49,14 @@ export const DashboardOverview = memo(function DashboardOverview() {
 		[],
 	);
 
-	// Memoize calculations to prevent unnecessary recalculations
-	const calculations = useMemo(() => {
-		if (!debts)
-			return {
-				totalDebt: 0,
-				totalMinimumPayment: 0,
-				averageInterestRate: 0,
-				upcomingPayments: 0,
-			};
+	// Use debt metrics hook for better calculations
+	const debtMetrics = useDebtMetrics(debts || []);
 
-		const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-		const totalMinimumPayment = debts.reduce(
-			(sum, debt) => sum + debt.minimumPayment,
-			0,
-		);
-		const averageInterestRate = debts.length
-			? debts.reduce((sum, debt) => sum + debt.interestRate, 0) / debts.length
-			: 0;
-
+	// Calculate upcoming payments
+	const upcomingPayments = useMemo(() => {
+		if (!debts) return 0;
 		const today = new Date();
-		const upcomingPayments = debts.filter((debt) => {
+		return debts.filter((debt) => {
 			if (!debt.dueDate) return false;
 			const dueDate = new Date(debt.dueDate);
 			const daysDiff = Math.ceil(
@@ -75,21 +64,7 @@ export const DashboardOverview = memo(function DashboardOverview() {
 			);
 			return daysDiff >= 0 && daysDiff <= 7;
 		}).length;
-
-		return {
-			totalDebt,
-			totalMinimumPayment,
-			averageInterestRate,
-			upcomingPayments,
-		};
 	}, [debts]);
-
-	const {
-		totalDebt,
-		totalMinimumPayment,
-		averageInterestRate,
-		upcomingPayments,
-	} = calculations;
 
 	if (isLoading) {
 		return (
@@ -136,7 +111,7 @@ export const DashboardOverview = memo(function DashboardOverview() {
 					</CardHeader>
 					<CardContent>
 						<div className="font-bold text-2xl">
-							${totalDebt.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+							{formatCurrency(debtMetrics.totalDebt)}
 						</div>
 						<p className="text-muted-foreground text-xs">
 							Across {debts?.length ?? 0} debt{debts?.length !== 1 ? "s" : ""}
@@ -155,10 +130,7 @@ export const DashboardOverview = memo(function DashboardOverview() {
 					</CardHeader>
 					<CardContent>
 						<div className="font-bold text-2xl">
-							$
-							{totalMinimumPayment.toLocaleString("en-US", {
-								minimumFractionDigits: 2,
-							})}
+							{formatCurrency(debtMetrics.totalMinimumPayments)}
 						</div>
 						<p className="text-muted-foreground text-xs">
 							Required monthly payment
@@ -177,7 +149,7 @@ export const DashboardOverview = memo(function DashboardOverview() {
 					</CardHeader>
 					<CardContent>
 						<div className="font-bold text-2xl">
-							{averageInterestRate.toFixed(1)}%
+							{debtMetrics.weightedAverageInterestRate.toFixed(1)}%
 						</div>
 						<p className="text-muted-foreground text-xs">
 							Weighted average APR

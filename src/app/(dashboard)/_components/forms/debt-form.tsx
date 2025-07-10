@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import type * as z from "zod";
+import { CurrencyField } from "~/components/forms/currency-field";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -28,18 +28,19 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
-import { ZCreateDebt } from "~/server/api/routers/debt/debt.schema";
-
-const formSchema = ZCreateDebt;
+import {
+	type TCreateDebt,
+	ZCreateDebt,
+} from "~/server/api/routers/debt/debt.schema";
 
 type DebtFormProps = {
-	onSubmit: (values: z.infer<typeof formSchema>) => void;
+	onSubmit: (values: TCreateDebt) => void;
 	isLoading?: boolean;
 };
 
 export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
+	const form = useForm<TCreateDebt>({
+		resolver: zodResolver(ZCreateDebt),
 		defaultValues: {
 			name: "",
 			type: "credit_card",
@@ -49,21 +50,25 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 		},
 	});
 
-	function handleSubmit(values: z.infer<typeof formSchema>) {
+	function handleSubmit(values: TCreateDebt) {
 		onSubmit(values);
 	}
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
 				<FormField
 					control={form.control}
 					name="name"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Debt Name</FormLabel>
+							<FormLabel className="font-medium text-sm">Debt Name</FormLabel>
 							<FormControl>
-								<Input placeholder="Credit Card 1" {...field} />
+								<Input
+									placeholder="e.g., Chase Freedom Credit Card"
+									className="h-11"
+									{...field}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -75,18 +80,18 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 					name="type"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Debt Type</FormLabel>
+							<FormLabel className="font-medium text-sm">Debt Type</FormLabel>
 							<Select onValueChange={field.onChange} defaultValue={field.value}>
 								<FormControl>
-									<SelectTrigger>
+									<SelectTrigger className="h-11 w-full">
 										<SelectValue placeholder="Select debt type" />
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									<SelectItem value="credit_card">Credit Card</SelectItem>
-									<SelectItem value="loan">Personal Loan</SelectItem>
-									<SelectItem value="mortgage">Mortgage</SelectItem>
-									<SelectItem value="other">Other</SelectItem>
+									<SelectItem value="credit_card">💳 Credit Card</SelectItem>
+									<SelectItem value="loan">🏦 Personal Loan</SelectItem>
+									<SelectItem value="mortgage">🏠 Mortgage</SelectItem>
+									<SelectItem value="other">📄 Other</SelectItem>
 								</SelectContent>
 							</Select>
 							<FormMessage />
@@ -94,66 +99,60 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 					)}
 				/>
 
-				<div className="grid grid-cols-2 gap-4">
-					<FormField
-						control={form.control}
-						name="balance"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Current Balance</FormLabel>
-								<FormControl>
-									<Input
-										type="number"
-										step="0.01"
-										placeholder="5000.00"
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value))}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+				<FormField
+					control={form.control}
+					name="balance"
+					render={({ field }) => (
+						<CurrencyField
+							field={field}
+							label="Current Balance"
+							placeholder="5,000.00"
+							className="h-11"
+							required
+						/>
+					)}
+				/>
 
+				<div className="grid grid-cols-2 gap-4">
 					<FormField
 						control={form.control}
 						name="interestRate"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Interest Rate (%)</FormLabel>
+								<FormLabel className="font-medium text-sm">
+									Interest Rate
+								</FormLabel>
 								<FormControl>
-									<Input
-										type="number"
-										step="0.01"
-										placeholder="18.99"
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value))}
-									/>
+									<div className="relative">
+										<Input
+											type="number"
+											step="0.01"
+											placeholder="18.99"
+											className="h-11 pr-8"
+											{...field}
+											onChange={(e) => field.onChange(Number(e.target.value))}
+										/>
+										<span className="-translate-y-1/2 absolute top-1/2 right-3 text-gray-500 text-sm">
+											%
+										</span>
+									</div>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
 						)}
 					/>
-				</div>
 
-				<div className="grid grid-cols-2 gap-4">
 					<FormField
 						control={form.control}
 						name="minimumPayment"
 						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Minimum Payment</FormLabel>
-								<FormControl>
-									<Input
-										type="number"
-										step="0.01"
-										placeholder="150.00"
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value))}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
+							<CurrencyField
+								field={field}
+								label="Minimum Payment"
+								placeholder="150.00"
+								className="h-11"
+								required
+							/>
 						)}
 					/>
 
@@ -162,14 +161,16 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 						name="dueDate"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Due Date (Optional)</FormLabel>
+								<FormLabel className="font-medium text-sm">
+									Due Date (Optional)
+								</FormLabel>
 								<Popover>
 									<PopoverTrigger asChild>
 										<FormControl>
 											<Button
 												variant="outline"
 												className={cn(
-													"w-full pl-3 text-left font-normal",
+													"h-11 w-full justify-start text-left font-normal",
 													!field.value && "text-muted-foreground",
 												)}
 											>
@@ -188,7 +189,6 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 											selected={field.value}
 											onSelect={field.onChange}
 											disabled={(date) => date < new Date()}
-											initialFocus
 										/>
 									</PopoverContent>
 								</Popover>
@@ -198,7 +198,7 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 					/>
 				</div>
 
-				<Button type="submit" className="w-full" disabled={isLoading}>
+				<Button type="submit" className="h-11 w-full" disabled={isLoading}>
 					{isLoading ? "Adding Debt..." : "Add Debt"}
 				</Button>
 			</form>

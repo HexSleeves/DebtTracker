@@ -94,7 +94,8 @@ function handleTRPCError(error: unknown, path: string): TRPCError {
 	// Network/timeout errors
 	if (error instanceof Error) {
 		if (
-			error.message.includes("timeout") || error.message.includes("TIMEOUT")
+			error.message.includes("timeout") ||
+			error.message.includes("TIMEOUT")
 		) {
 			return new TRPCError({
 				code: "TIMEOUT",
@@ -104,7 +105,8 @@ function handleTRPCError(error: unknown, path: string): TRPCError {
 		}
 
 		if (
-			error.message.includes("network") || error.message.includes("NETWORK")
+			error.message.includes("network") ||
+			error.message.includes("NETWORK")
 		) {
 			return new TRPCError({
 				code: "INTERNAL_SERVER_ERROR",
@@ -141,9 +143,8 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 			...shape,
 			data: {
 				...shape.data,
-				zodError: error.cause instanceof z.ZodError
-					? error.cause.flatten()
-					: null,
+				zodError:
+					error.cause instanceof z.ZodError ? error.cause.flatten() : null,
 				timestamp: new Date().toISOString(),
 			},
 		};
@@ -276,18 +277,17 @@ export const protectedProcedure = t.procedure
 /**
  * Enhanced procedure with additional validation and error handling
  */
-export const enhancedProcedure = protectedProcedure
-	.use(async ({ next }) => {
-		// Additional validation or setup can be done here
-		// For example, checking user permissions, setting up additional context, etc.
+export const enhancedProcedure = protectedProcedure.use(async ({ next }) => {
+	// Additional validation or setup can be done here
+	// For example, checking user permissions, setting up additional context, etc.
 
-		try {
-			return await next();
-		} catch (error) {
-			// Additional error handling if needed
-			throw error;
-		}
-	});
+	try {
+		return await next();
+	} catch (error) {
+		// Additional error handling if needed
+		throw error;
+	}
+});
 
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 export type ProtectedTRPCContext = TRPCContext & {

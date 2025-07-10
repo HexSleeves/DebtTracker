@@ -92,6 +92,18 @@ export function PerformanceMonitor() {
 		return () => clearInterval(interval);
 	}, [measurePerformance]);
 
+	// Open on command + shift + o
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.metaKey && event.shiftKey && event.key === "o") {
+				setIsVisible((isVisible) => !isVisible);
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
+
 	// Only show in development
 	if (process.env.NODE_ENV !== "development") {
 		return null;
