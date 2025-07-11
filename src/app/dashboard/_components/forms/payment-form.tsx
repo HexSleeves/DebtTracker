@@ -152,11 +152,7 @@ export function PaymentForm({
 											<Input
 												type="date"
 												{...field}
-												value={
-													field.value
-														? field.value.toISOString().split("T")[0]
-														: ""
-												}
+												value={field.value ? field.value.toISOString() : ""}
 												onChange={(e) =>
 													field.onChange(new Date(e.target.value))
 												}

@@ -115,7 +115,7 @@ export async function createPayment({
 		throw new Error("Payment amount cannot exceed debt balance");
 	}
 
-	const paymentDateString = input.paymentDate.toISOString().split("T")[0];
+	const paymentDateString = input.paymentDate.toISOString();
 	if (!paymentDateString) {
 		throw new Error("Invalid payment date");
 	}
@@ -191,9 +191,7 @@ export async function updatePayment({
 		dbUpdateData.amount = updateData.amount;
 	}
 	if (updateData.paymentDate !== undefined) {
-		dbUpdateData.payment_date = updateData.paymentDate
-			.toISOString()
-			.split("T")[0];
+		dbUpdateData.payment_date = updateData.paymentDate.toISOString();
 	}
 	if (updateData.type !== undefined) {
 		dbUpdateData.type = updateData.type;
@@ -275,8 +273,8 @@ export async function deletePayment({
 	}
 
 	// Restore the debt balance
-	const restoredBalance =
-		Number(payment.debts.balance) + Number(payment.amount);
+	const restoredBalance = Number(payment.debts.balance) +
+		Number(payment.amount);
 	if (payment.debt_id) {
 		await ctx.supabase
 			.from("debts")

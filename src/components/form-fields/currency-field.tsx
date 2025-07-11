@@ -32,7 +32,16 @@ export const CurrencyField = <T extends FieldValues>(
 			typeof field.value === "number"
 				? field.value.toString()
 				: field.value || "";
-		setDisplayValue(numericValue.replace(/[^0-9.]/g, ""));
+
+		// Remove formatting and show raw number for editing
+		const cleanValue = numericValue.replace(/[^0-9.]/g, "");
+
+		// Clear the input if the value is exactly "0" to prevent typing "010", "020", etc.
+		if (cleanValue === "0") {
+			setDisplayValue("");
+		} else {
+			setDisplayValue(cleanValue);
+		}
 	}, [field.value]);
 
 	const handleChange = useCallback(

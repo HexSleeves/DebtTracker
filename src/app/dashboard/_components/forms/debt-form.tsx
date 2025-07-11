@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { CurrencyField } from "~/components/forms/currency-field";
+import { CurrencyField, NumberField } from "~/components/form-fields";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import {
@@ -99,46 +99,34 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 					)}
 				/>
 
-				<FormField
-					control={form.control}
-					name="balance"
-					render={({ field }) => (
-						<CurrencyField
-							field={field}
-							label="Current Balance"
-							placeholder="5,000.00"
-							className="h-11"
-							required
-						/>
-					)}
-				/>
-
 				<div className="grid grid-cols-2 gap-4">
+					<FormField
+						control={form.control}
+						name="balance"
+						render={({ field }) => (
+							<CurrencyField
+								field={field}
+								label="Current Balance"
+								placeholder="5,000.00"
+								className="h-11"
+								required
+							/>
+						)}
+					/>
+
 					<FormField
 						control={form.control}
 						name="interestRate"
 						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="font-medium text-sm">
-									Interest Rate
-								</FormLabel>
-								<FormControl>
-									<div className="relative">
-										<Input
-											type="number"
-											step="0.01"
-											placeholder="18.99"
-											className="h-11 pr-8"
-											{...field}
-											onChange={(e) => field.onChange(Number(e.target.value))}
-										/>
-										<span className="-translate-y-1/2 absolute top-1/2 right-3 text-gray-500 text-sm">
-											%
-										</span>
-									</div>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
+							<NumberField
+								field={field}
+								label="Interest Rate"
+								suffix="%"
+								min={0}
+								max={100}
+								step={0.01}
+								decimalPlaces={2}
+							/>
 						)}
 					/>
 

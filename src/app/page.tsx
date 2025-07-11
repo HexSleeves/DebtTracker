@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import {
 	ArrowRight,
 	BarChart3,
@@ -11,6 +12,7 @@ import {
 	Users,
 } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -22,7 +24,13 @@ import {
 } from "~/components/ui/card";
 import { SiteConfig } from "~/config/site";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+	const { userId } = await auth();
+
+	if (userId) {
+		redirect("/dashboard");
+	}
+
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
 			{/* Header */}

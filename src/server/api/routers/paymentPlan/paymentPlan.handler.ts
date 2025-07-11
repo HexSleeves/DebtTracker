@@ -128,7 +128,7 @@ export async function createPaymentPlan({
 		strategy: input.strategy,
 		monthly_budget: input.monthlyBudget,
 		extra_payment: input.extraPayment,
-		target_date: input.targetDate?.toISOString().split("T")[0] || null,
+		target_date: input.targetDate?.toISOString() || null,
 		is_active: input.isActive ?? false,
 	};
 
@@ -181,8 +181,7 @@ export async function updatePaymentPlan({
 		dbUpdateData.extra_payment = updateData.extraPayment;
 	}
 	if (updateData.targetDate !== undefined) {
-		dbUpdateData.target_date =
-			updateData.targetDate?.toISOString().split("T")[0] || null;
+		dbUpdateData.target_date = updateData.targetDate?.toISOString() || null;
 	}
 	if (updateData.isActive !== undefined) {
 		dbUpdateData.is_active = updateData.isActive;
