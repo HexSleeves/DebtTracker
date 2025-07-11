@@ -1,31 +1,19 @@
 {
-	"mcpServers": {
-		"filesystem": {
-			"command": "bunx",
-			"args": ["@modelcontextprotocol/server-filesystem", "./"]
-		},
-		"language-server": {
-			"command": "mcp-language-server",
-			"args": [
-				"--workspace",
-				"/Users/jacob.lecoq.ext/Projects/debt-tracker",
-				"--lsp",
-				"typescript-language-server",
-				"--",
-				"--stdio"
-			]
-		},
-		"supabase": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"@supabase/mcp-server-supabase@latest",
-				"--read-only",
-				"--project-ref=gkcjyuwoaeahfredvufc"
-			],
-			"env": {
-				"SUPABASE_ACCESS_TOKEN": "sbp_6ab5249563fffaa144c035e8f390a08140133187"
-			}
-		}
-	}
+  "mcpServers": {
+    "language-server": {
+      "command": "mcp-language-server",
+      "args": [
+        "--workspace",
+        "/Users/jacob.lecoq.ext/Projects/debt-tracker",
+        "--lsp",
+        "typescript-language-server",
+        "--",
+        "--stdio"
+      ]
+    },
+    "browsermcp": {
+      "command": "npx",
+      "args": ["-y", "@browsermcp/mcp"]
+    }
+  }
 }
