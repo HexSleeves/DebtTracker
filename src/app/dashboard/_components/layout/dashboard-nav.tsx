@@ -34,7 +34,7 @@ export function DashboardNav({
 	const NavContent = () => (
 		<div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background px-6 pb-4">
 			<div className="flex h-16 shrink-0 items-center">
-				<h1 className="font-bold text-foreground text-xl">Debt Manager</h1>
+				<h1 className="font-bold text-primary text-xl">Debt Manager</h1>
 			</div>
 			<nav className="flex flex-1 flex-col" aria-label="Main navigation">
 				<ul className="flex flex-1 flex-col gap-y-7">
@@ -46,9 +46,9 @@ export function DashboardNav({
 										href={item.href}
 										className={cn(
 											pathname === item.href
-												? "bg-primary text-primary-foreground"
-												: "text-foreground hover:bg-accent hover:text-accent-foreground",
-											"group flex gap-x-3 rounded-md p-2 font-semibold text-sm leading-6 transition-colors",
+												? "border-l-4 border-l-primary/50 bg-primary text-primary-foreground shadow-sm"
+												: "text-foreground hover:border-l-4 hover:border-l-primary/20 hover:bg-accent hover:text-accent-foreground hover:shadow-sm",
+											"group flex gap-x-3 rounded-md p-2 font-semibold text-sm leading-6 transition-all duration-200",
 										)}
 										onClick={() => setSidebarOpen(false)}
 										aria-current={pathname === item.href ? "page" : undefined}
@@ -57,7 +57,7 @@ export function DashboardNav({
 											className={cn(
 												pathname === item.href
 													? "text-primary-foreground"
-													: "text-muted-foreground group-hover:text-accent-foreground",
+													: "text-muted-foreground transition-colors group-hover:text-primary",
 												"h-6 w-6 shrink-0",
 											)}
 											aria-hidden="true"

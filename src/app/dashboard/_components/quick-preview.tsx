@@ -96,6 +96,20 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
 		);
 	}
 
+	// Determine interest rate status color
+	const getInterestRateColor = (rate: number) => {
+		if (rate >= 15) return "text-error";
+		if (rate >= 8) return "text-warning";
+		return "text-success";
+	};
+
+	// Determine payment urgency color
+	const getPaymentUrgencyColor = (count: number) => {
+		if (count === 0) return "text-success";
+		if (count <= 2) return "text-info";
+		return "text-warning";
+	};
+
 	return (
 		<motion.div
 			className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
@@ -103,14 +117,15 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
 			initial="hidden"
 			animate="visible"
 		>
+			{/* Total Debt */}
 			<motion.div variants={cardVariants}>
-				<Card>
+				<Card className="hover-lift border-l-4 border-l-primary">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">Total Debt</CardTitle>
-						<DollarSign className="h-4 w-4 text-muted-foreground" />
+						<DollarSign className="h-4 w-4 text-primary" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-bold text-2xl">
+						<div className="font-bold text-2xl text-primary">
 							{formatCurrency(debtMetrics.totalDebt)}
 						</div>
 						<p className="text-muted-foreground text-xs">
@@ -120,16 +135,17 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
 				</Card>
 			</motion.div>
 
+			{/* Monthly Minimum */}
 			<motion.div variants={cardVariants}>
-				<Card>
+				<Card className="hover-lift border-l-4 border-l-info">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">
 							Monthly Minimum
 						</CardTitle>
-						<CreditCard className="h-4 w-4 text-muted-foreground" />
+						<CreditCard className="h-4 w-4 text-info" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-bold text-2xl">
+						<div className="font-bold text-2xl text-info">
 							{formatCurrency(debtMetrics.totalMinimumPayments)}
 						</div>
 						<p className="text-muted-foreground text-xs">
@@ -139,16 +155,33 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
 				</Card>
 			</motion.div>
 
+			{/* Average Interest Rate */}
 			<motion.div variants={cardVariants}>
-				<Card>
+				<Card
+					className={`hover-lift border-l-4 ${
+						debtMetrics.weightedAverageInterestRate >= 15
+							? "border-l-error"
+							: debtMetrics.weightedAverageInterestRate >= 8
+								? "border-l-warning"
+								: "border-l-success"
+					}`}
+				>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">
 							Average Interest Rate
 						</CardTitle>
-						<TrendingDown className="h-4 w-4 text-muted-foreground" />
+						<TrendingDown
+							className={`h-4 w-4 ${getInterestRateColor(
+								debtMetrics.weightedAverageInterestRate,
+							)}`}
+						/>
 					</CardHeader>
 					<CardContent>
-						<div className="font-bold text-2xl">
+						<div
+							className={`font-bold text-2xl ${getInterestRateColor(
+								debtMetrics.weightedAverageInterestRate,
+							)}`}
+						>
 							{debtMetrics.weightedAverageInterestRate.toFixed(1)}%
 						</div>
 						<p className="text-muted-foreground text-xs">
@@ -158,14 +191,31 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
 				</Card>
 			</motion.div>
 
+			{/* Due This Week */}
 			<motion.div variants={cardVariants}>
-				<Card>
+				<Card
+					className={`hover-lift border-l-4 ${
+						upcomingPayments === 0
+							? "border-l-success"
+							: upcomingPayments <= 2
+								? "border-l-info"
+								: "border-l-warning"
+					}`}
+				>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="font-medium text-sm">Due This Week</CardTitle>
-						<Calendar className="h-4 w-4 text-muted-foreground" />
+						<Calendar
+							className={`h-4 w-4 ${getPaymentUrgencyColor(upcomingPayments)}`}
+						/>
 					</CardHeader>
 					<CardContent>
-						<div className="font-bold text-2xl">{upcomingPayments}</div>
+						<div
+							className={`font-bold text-2xl ${getPaymentUrgencyColor(
+								upcomingPayments,
+							)}`}
+						>
+							{upcomingPayments}
+						</div>
 						<p className="text-muted-foreground text-xs">
 							Payment{upcomingPayments !== 1 ? "s" : ""} due within 7 days
 						</p>

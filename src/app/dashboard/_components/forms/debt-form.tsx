@@ -192,7 +192,11 @@ export function DebtForm({
 					/>
 				</div>
 
-				<Button type="submit" className="h-11 w-full" disabled={isLoading}>
+				<Button 
+					type="submit" 
+					className="h-11 w-full interactive-primary" 
+					disabled={isLoading}
+				>
 					{isLoading
 						? defaultValues
 							? "Updating Debt..."

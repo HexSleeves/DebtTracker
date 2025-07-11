@@ -53,7 +53,7 @@ export function QuickActions() {
 				ctx.setIsOpen(false);
 				setIsDebtDialogOpen(true);
 			},
-			color: "bg-blue-500 hover:bg-blue-600",
+			color: "bg-info hover:bg-info/90 text-info-foreground",
 		},
 		{
 			icon: <DollarSign size={20} />,
@@ -62,13 +62,13 @@ export function QuickActions() {
 				ctx.setIsOpen(false);
 				setIsLogPaymentDialogOpen(true);
 			},
-			color: "bg-green-500 hover:bg-green-600",
+			color: "bg-success hover:bg-success/90 text-success-foreground",
 		},
 		{
 			icon: <TrendingUp size={20} />,
 			label: "View Strategies",
 			href: "/dashboard/strategies",
-			color: "bg-purple-500 hover:bg-purple-600",
+			color: "bg-primary hover:bg-primary/90 text-primary-foreground",
 		},
 	];
 
@@ -78,9 +78,12 @@ export function QuickActions() {
 
 			{/* Add Debt Dialog */}
 			<Dialog open={isDebtDialogOpen} onOpenChange={setIsDebtDialogOpen}>
-				<DialogContent className="max-w-md">
+				<DialogContent className="max-w-md border-l-4 border-l-info">
 					<DialogHeader>
-						<DialogTitle>Add New Debt</DialogTitle>
+						<DialogTitle className="flex items-center gap-2 text-info">
+							<CreditCard className="h-5 w-5" />
+							Add New Debt
+						</DialogTitle>
 						<DialogDescription>
 							Enter the details of your debt to start tracking and optimizing
 							your payments.
@@ -98,12 +101,14 @@ export function QuickActions() {
 				open={isLogPaymentDialogOpen}
 				onOpenChange={setIsLogPaymentDialogOpen}
 			>
-				<DialogContent className="max-w-md">
+				<DialogContent className="max-w-md border-l-4 border-l-success">
 					<DialogHeader>
-						<DialogTitle>Log Payment</DialogTitle>
+						<DialogTitle className="flex items-center gap-2 text-success">
+							<DollarSign className="h-5 w-5" />
+							Log Payment
+						</DialogTitle>
 						<DialogDescription>
-							Enter the details of your payment to start tracking and optimizing
-							your payments.
+							Record a payment you've made to track your debt reduction progress.
 						</DialogDescription>
 					</DialogHeader>
 					<PaymentForm

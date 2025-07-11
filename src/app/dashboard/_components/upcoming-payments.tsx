@@ -67,10 +67,10 @@ export function UpcomingPayments() {
 			.slice(0, 5) ?? [];
 
 	return (
-		<Card>
+		<Card className="hover-lift">
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
-					<Calendar className="h-5 w-5" />
+					<Calendar className="h-5 w-5 text-primary" />
 					Upcoming Payments
 				</CardTitle>
 			</CardHeader>
@@ -81,51 +81,70 @@ export function UpcomingPayments() {
 							No payments due in the next 7 days
 						</p>
 					) : (
-						upcomingPayments.map((debt) => (
-							<div
-								key={debt.id}
-								className={`flex items-center justify-between rounded-lg p-3 ${
-									debt.isOverdue
-										? "border border-red-200 bg-red-50"
-										: "border border-gray-200 bg-gray-50"
-								}`}
-							>
-								<div className="flex items-center gap-3">
-									<CreditCard
-										className={`h-8 w-8 ${
-											debt.isOverdue ? "text-red-500" : "text-blue-500"
-										}`}
-									/>
-									<div>
-										<h4 className="font-medium text-sm">{debt.name}</h4>
-										<p className="text-muted-foreground text-xs">{debt.type}</p>
+						upcomingPayments.map((debt) => {
+							// Determine status styling
+							const getStatusStyling = () => {
+								if (debt.isOverdue) {
+									return {
+										container: "border border-error/20 bg-error/5 hover-lift",
+										icon: "text-error",
+										text: "text-error",
+										badge: "bg-error/10 text-error",
+									};
+								}
+								if (debt.daysDiff === 0) {
+									return {
+										container:
+											"border border-warning/20 bg-warning/5 hover-lift",
+										icon: "text-warning",
+										text: "text-warning",
+										badge: "bg-warning/10 text-warning",
+									};
+								}
+								return {
+									container: "border border-info/20 bg-info/5 hover-lift",
+									icon: "text-info",
+									text: "text-info",
+									badge: "bg-info/10 text-info",
+								};
+							};
+
+							const styling = getStatusStyling();
+
+							return (
+								<div
+									key={debt.id}
+									className={`flex items-center justify-between rounded-lg p-3 transition-all duration-200 ${styling.container}`}
+								>
+									<div className="flex items-center gap-3">
+										<div className={`rounded-lg p-2 ${styling.badge}`}>
+											<CreditCard className={`h-4 w-4 ${styling.icon}`} />
+										</div>
+										<div>
+											<h4 className="font-medium text-sm">{debt.name}</h4>
+											<p className="text-muted-foreground text-xs capitalize">
+												{debt.type.replace("_", " ")}
+											</p>
+										</div>
+									</div>
+									<div className="text-right">
+										<p className="font-medium text-sm">
+											$
+											{debt.minimumPayment.toLocaleString("en-US", {
+												minimumFractionDigits: 2,
+											})}
+										</p>
+										<p className={`font-medium text-xs ${styling.text}`}>
+											{debt.isOverdue
+												? `${Math.abs(debt.daysDiff)} day${Math.abs(debt.daysDiff) !== 1 ? "s" : ""} overdue`
+												: debt.daysDiff === 0
+													? "Due today"
+													: `Due in ${debt.daysDiff} day${debt.daysDiff !== 1 ? "s" : ""}`}
+										</p>
 									</div>
 								</div>
-								<div className="text-right">
-									<p className="font-medium text-sm">
-										$
-										{debt.minimumPayment.toLocaleString("en-US", {
-											minimumFractionDigits: 2,
-										})}
-									</p>
-									<p
-										className={`text-xs ${
-											debt.isOverdue
-												? "text-red-600"
-												: debt.daysDiff === 0
-													? "text-orange-600"
-													: "text-muted-foreground"
-										}`}
-									>
-										{debt.isOverdue
-											? `${Math.abs(debt.daysDiff)} day${Math.abs(debt.daysDiff) !== 1 ? "s" : ""} overdue`
-											: debt.daysDiff === 0
-												? "Due today"
-												: `Due in ${debt.daysDiff} day${debt.daysDiff !== 1 ? "s" : ""}`}
-									</p>
-								</div>
-							</div>
-						))
+							);
+						})
 					)}
 				</div>
 			</CardContent>

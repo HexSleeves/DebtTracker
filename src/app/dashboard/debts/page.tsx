@@ -237,18 +237,21 @@ export default function DebtsPage() {
 
 				<Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
 					<DialogTrigger asChild>
-						<Button>
+						<Button className="interactive-primary">
 							<Plus className="mr-2 h-4 w-4" />
 							Add Debt
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-md">
-						<DialogHeader>
-							<DialogTitle>Add New Debt</DialogTitle>
-							<DialogDescription>
-								Enter the details of your new debt to start tracking it.
-							</DialogDescription>
-						</DialogHeader>
+					<DialogContent className="sm:max-w-md border-l-4 border-l-primary">
+					<DialogHeader>
+					<DialogTitle className="flex items-center gap-2 text-primary">
+					 <Plus className="h-5 w-5" />
+					Add New Debt
+					</DialogTitle>
+					 <DialogDescription>
+									Enter the details of your new debt to start tracking it.
+								</DialogDescription>
+							</DialogHeader>
 						<DebtForm
 							onSubmit={handleCreateDebt}
 							isLoading={createDebtMutation.isPending}
@@ -264,7 +267,7 @@ export default function DebtsPage() {
 					<p className="mb-4 text-muted-foreground">
 						Start by adding your first debt to begin tracking your progress.
 					</p>
-					<Button onClick={() => setIsAddDialogOpen(true)}>
+					<Button onClick={() => setIsAddDialogOpen(true)} className="interactive-primary">
 						<Plus className="mr-2 h-4 w-4" />
 						Add Your First Debt
 					</Button>
@@ -394,12 +397,13 @@ export default function DebtsPage() {
 							Cancel
 						</Button>
 						<Button
-							variant="destructive"
-							onClick={() => deletingDebtId && handleDeleteDebt(deletingDebtId)}
-							disabled={deleteDebtMutation.isPending}
+						variant="destructive"
+						className="interactive-error"
+						onClick={() => deletingDebtId && handleDeleteDebt(deletingDebtId)}
+						 disabled={deleteDebtMutation.isPending}
 						>
-							{deleteDebtMutation.isPending ? "Deleting..." : "Delete"}
-						</Button>
+						 {deleteDebtMutation.isPending ? "Deleting..." : "Delete"}
+																																																</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
