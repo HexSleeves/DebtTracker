@@ -7,4 +7,4 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPercentage(rate: number): string {
 	return `${rate.toFixed(2)}%`;
-};
+}

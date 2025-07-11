@@ -26,18 +26,18 @@ export default function StrategiesPage() {
 	const monthlyBudget = 1500;
 
 	const {
+		error,
 		avalanche,
 		snowball,
 		comparison,
 		metrics,
 		budgetImpact,
 		isLoading: strategyLoading,
-		error,
 	} = useDebtStrategy(debts || [], monthlyBudget);
 
 	const recommendations = useDebtRecommendations(debts || [], monthlyBudget);
 
-	if (isLoading) {
+	if (isLoading || strategyLoading) {
 		return <StrategiesPageSkeleton />;
 	}
 

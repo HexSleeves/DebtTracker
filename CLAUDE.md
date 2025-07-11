@@ -15,6 +15,7 @@ This is a debt management and repayment optimization application built to help u
 - `bun run check` - Run Biome linting and formatting checks
 - `bun run check:write` - Run Biome checks and fix auto-fixable issues
 - `bun run check:unsafe` - Run Biome checks with unsafe fixes
+- **IMPORTANT**: Run `bun run typecheck` after changes to ensure your changes didnt break typescript
 
 ### Testing Commands
 

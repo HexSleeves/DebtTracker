@@ -273,8 +273,8 @@ export async function deletePayment({
 	}
 
 	// Restore the debt balance
-	const restoredBalance = Number(payment.debts.balance) +
-		Number(payment.amount);
+	const restoredBalance =
+		Number(payment.debts.balance) + Number(payment.amount);
 	if (payment.debt_id) {
 		await ctx.supabase
 			.from("debts")

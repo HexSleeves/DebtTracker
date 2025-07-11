@@ -3,7 +3,9 @@
 		"allow": [
 			"Bash(ls:*)",
 			"Bash(supabase db reset:*)",
-			"Bash(npx shadcn@latest add *)"
+			"Bash(npx shadcn@latest add *)",
+			"Bash(bun run:*)",
+			"Bash(bun run:*)"
 		],
 		"deny": []
 	},

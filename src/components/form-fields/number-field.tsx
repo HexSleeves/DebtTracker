@@ -104,12 +104,12 @@ export const NumberField = <T extends FieldValues>(
 			typeof field.value === "number"
 				? field.value.toString()
 				: field.value || "";
-		
+
 		// Remove formatting and show raw number for editing
 		const cleanValue = allowNegative
 			? numericValue.replace(/[^0-9.-]/g, "")
 			: numericValue.replace(/[^0-9.]/g, "");
-		
+
 		// Clear the input if the value is exactly "0" to prevent typing "010", "020", etc.
 		if (cleanValue === "0") {
 			setDisplayValue("");

@@ -36,17 +36,23 @@ import {
 type DebtFormProps = {
 	onSubmit: (values: TCreateDebt) => void;
 	isLoading?: boolean;
+	defaultValues?: Partial<TCreateDebt>;
 };
 
-export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
+export function DebtForm({
+	onSubmit,
+	isLoading,
+	defaultValues,
+}: DebtFormProps) {
 	const form = useForm<TCreateDebt>({
 		resolver: zodResolver(ZCreateDebt),
 		defaultValues: {
-			name: "",
-			type: "credit_card",
-			balance: 0,
-			interestRate: 0,
-			minimumPayment: 0,
+			name: defaultValues?.name ?? "",
+			type: defaultValues?.type ?? "credit_card",
+			balance: defaultValues?.balance ?? 0,
+			interestRate: defaultValues?.interestRate ?? 0,
+			minimumPayment: defaultValues?.minimumPayment ?? 0,
+			dueDate: defaultValues?.dueDate,
 		},
 	});
 
@@ -187,7 +193,13 @@ export function DebtForm({ onSubmit, isLoading }: DebtFormProps) {
 				</div>
 
 				<Button type="submit" className="h-11 w-full" disabled={isLoading}>
-					{isLoading ? "Adding Debt..." : "Add Debt"}
+					{isLoading
+						? defaultValues
+							? "Updating Debt..."
+							: "Adding Debt..."
+						: defaultValues
+							? "Update Debt"
+							: "Add Debt"}
 				</Button>
 			</form>
 		</Form>

@@ -5,7 +5,10 @@ export const ZCreateDebt = z.object({
 	name: z.string().min(1, "Debt name is required"),
 	type: z.enum(["credit_card", "loan", "mortgage", "other"]),
 	balance: z.number().min(0, "Balance must be positive"),
-	interestRate: z.number().min(0, "Interest rate must be positive"),
+	interestRate: z
+		.number()
+		.min(0, "Interest rate must be positive")
+		.max(100, "Interest rate cannot exceed 100%"),
 	minimumPayment: z.number().min(0, "Minimum payment must be positive"),
 	dueDate: z.date().optional(),
 });

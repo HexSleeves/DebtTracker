@@ -274,21 +274,6 @@ export const protectedProcedure = t.procedure
 		});
 	});
 
-/**
- * Enhanced procedure with additional validation and error handling
- */
-export const enhancedProcedure = protectedProcedure.use(async ({ next }) => {
-	// Additional validation or setup can be done here
-	// For example, checking user permissions, setting up additional context, etc.
-
-	try {
-		return await next();
-	} catch (error) {
-		// Additional error handling if needed
-		throw error;
-	}
-});
-
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 export type ProtectedTRPCContext = TRPCContext & {
 	userId: NonNullable<TRPCContext["userId"]>;
