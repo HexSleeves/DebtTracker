@@ -15,7 +15,7 @@ import {
   Edit,
   MoreVertical,
   Plus,
-  Trash2,
+  Trash2
 } from "lucide-react";
 import { useMemo } from "react";
 import { DashboardCardSkeleton } from "~/components/suspense-wrapper";
@@ -77,9 +77,11 @@ export function DebtTable({
       enableSorting: false,
     }),
     columnHelper.accessor("balance", {
-      header: "Balance",
+      header: ({ column }) => (
+        <div className="text-center">Balance</div>
+      ),
       cell: (info) => (
-        <div className="text-right">
+        <div className="text-center">
           <span className="font-mono">{formatCurrency(info.getValue())}</span>
         </div>
       ),
@@ -87,17 +89,21 @@ export function DebtTable({
       sortDescFirst: true,
     }),
     columnHelper.accessor("interestRate", {
-      header: "Interest Rate",
+      header: ({ column }) => (
+        <div className="text-center">Interest Rate</div>
+      ),
       cell: (info) => (
-        <div className="text-right">{formatPercentage(info.getValue())}</div>
+        <div className="text-center">{formatPercentage(info.getValue())}</div>
       ),
       sortingFn: "basic",
       sortDescFirst: true,
     }),
     columnHelper.accessor("minimumPayment", {
-      header: "Min Payment",
+      header: ({ column }) => (
+        <div className="text-center">Min Payment</div>
+      ),
       cell: (info) => (
-        <div className="text-right">
+        <div className="text-center">
           <span className="font-mono">{formatCurrency(info.getValue())}</span>
         </div>
       ),
@@ -105,7 +111,9 @@ export function DebtTable({
       sortDescFirst: true,
     }),
     columnHelper.accessor("dueDate", {
-      header: "Due Date",
+      header: ({ column }) => (
+        <div className="text-center">Due Date</div>
+      ),
       cell: (info) => {
         const date = info.getValue();
         return (
@@ -119,30 +127,34 @@ export function DebtTable({
     }),
     columnHelper.display({
       id: "actions",
-      header: "",
+      header: ({ column }) => (
+        <div className="text-center"></div>
+      ),
       cell: ({ row }) => {
         const debt = row.original;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setEditingDebt(debt)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setDeletingDebtId(debt.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex justify-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setEditingDebt(debt)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setDeletingDebtId(debt.id)}
+                  className="text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
       enableSorting: false,
@@ -176,18 +188,19 @@ export function DebtTable({
                 header.column.getCanSort()
                   ? "hover:bg-muted/50 cursor-pointer transition-colors select-none"
                   : ""
-              } ${header.id === "actions" ? "w-[50px]" : ""}`}
+              } ${header.id === "actions" ? "w-[50px]" : ""} relative`}
               onClick={header.column.getToggleSortingHandler()}
             >
               <div className="flex items-center gap-2">
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
+              {header.isPlaceholder
+                ? null
+                : flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
                 {header.column.getCanSort() && (
-                  <div className="ml-2 flex items-center">
+                  // <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+                  <div className="flex items-center">
                     {header.column.getIsSorted() === "asc" ? (
                       <ArrowUp className="h-4 w-4" />
                     ) : header.column.getIsSorted() === "desc" ? (
@@ -195,13 +208,13 @@ export function DebtTable({
                     ) : (
                       <ArrowUpDown className="h-4 w-4 opacity-50" />
                     )}
-                    {header.column.getIsSorted() && (
+                    {/* {header.column.getIsSorted() && (
                       <span className="text-muted-foreground ml-1 text-xs">
                         {tableSorting.findIndex(
                           (s) => s.id === header.column.id,
                         ) + 1}
                       </span>
-                    )}
+                    )} */}
                   </div>
                 )}
               </div>
