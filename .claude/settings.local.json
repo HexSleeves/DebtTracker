@@ -1,13 +1,7 @@
 {
-	"permissions": {
-		"allow": [
-			"Bash(ls:*)",
-			"Bash(supabase db reset:*)",
-			"Bash(npx shadcn@latest add *)",
-			"Bash(bun run:*)",
-			"Bash(bun run:*)"
-		],
-		"deny": []
-	},
-	"enabledMcpjsonServers": ["filesystem", "language-server"]
+  "permissions": {
+    "allow": ["Bash(ls:*)", "Bash(bun run:*)", "WebFetch(domain:tanstack.com)"],
+    "deny": []
+  },
+  "enabledMcpjsonServers": ["filesystem", "language-server"]
 }

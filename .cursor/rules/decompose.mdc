@@ -1,13 +1,9 @@
 ---
-description:
-globs:
-alwaysApply: false
----
----
 description: when user mentions /decompose, apply this rule
 globs:
 alwaysApply: false
 ---
+
 ## Rule to decompose PRD into stories and tasks
 
 # Task Breakdown Engine
@@ -15,6 +11,7 @@ alwaysApply: false
 Break PRDs into granular, implementable tasks with precise dependency ordering by an experienced developer with years of experience in reading and understanding PRDs
 
 # Usage
+
 /decompose - automatically reads from `docs/prd.md` and creates `.docs/tasks.json` (create both files if they don't exist)
 
 ## MCP servers (if available)
@@ -69,7 +66,7 @@ Break PRDs into granular, implementable tasks with precise dependency ordering b
 
 **Critical** - The implementation tasks should be sequential in nature with a logical order of things, without breaking existing code or functionality
 
-### For New Projects (Foundation-First):
+### For New Projects (Foundation-First)
 
 - Database Layer (DB-XXX): Schema, migrations, seed data
 - Backend Core (BE-XXX): Models, services, core business logic
@@ -78,7 +75,7 @@ Break PRDs into granular, implementable tasks with precise dependency ordering b
 - Integration (INT-XXX): External APIs, authentication flows
 Quality Assurance (QA-XXX): Tests, CI/CD, documentation
 
-### For Existing Projects (Integration-First):
+### For Existing Projects (Integration-First)
 
 - Database Updates (DB-XXX): Schema changes, data migrations
 - Backend Extensions (BE-XXX): Service modifications, new logic

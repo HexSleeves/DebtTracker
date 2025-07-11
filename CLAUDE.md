@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a debt management and repayment optimization application built to help users track, manage, and eliminate their debt efficiently. The application provides debt tracking, payment strategy optimization (Avalanche/Snowball methods), and progress visualization. See `docs/PRD.md` for detailed product requirements.
+A debt management and repayment optimization application built to help users track, manage, and eliminate debt efficiently. The application provides debt tracking, payment strategy optimization (Avalanche/Snowball methods), and progress visualization.
 
 ## Development Commands
 
@@ -15,188 +15,162 @@ This is a debt management and repayment optimization application built to help u
 - `bun run check` - Run Biome linting and formatting checks
 - `bun run check:write` - Run Biome checks and fix auto-fixable issues
 - `bun run check:unsafe` - Run Biome checks with unsafe fixes
-- **IMPORTANT**: Run `bun run typecheck` after changes to ensure your changes didnt break typescript
+- `bun run lint` - Run ESLint
+- `bun run lint:fix` - Run ESLint with auto-fix
+- `bun run format:check` - Check Prettier formatting
+- `bun run format:write` - Apply Prettier formatting
+- `bun run lighthouse` - Run Lighthouse performance audit
+- **IMPORTANT**: Run `bun run typecheck` after changes to ensure TypeScript compliance
 
 ### Testing Commands
 
 - `bun test` - Run Jest test suite
 - `bun test --watch` - Run tests in watch mode
 - `bun test --coverage` - Run tests with coverage report
-- Test files: `src/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}`
+- Test files: `src/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}` and `src/**/*.{test,spec}.{js,jsx,ts,tsx}`
 
 ## Architecture Overview
 
-This is a T3 Stack application built with:
+Next.js 15 application using the App Router with:
 
-- **Next.js 15** (App Router) - React framework with SSR/SSG
-- **tRPC** - End-to-end typesafe APIs
-- **Tailwind CSS** - Utility-first CSS framework
-- **TypeScript** - Type safety
-- **Biome** - Linting and formatting
+- **Next.js 15** - React framework with App Router, React 19, and React Compiler
+- **tRPC** - End-to-end typesafe APIs with React Query integration
+- **Tailwind CSS 4** - Utility-first CSS framework with PostCSS
+- **TypeScript** - Type safety with strict mode
+- **Biome** - Fast linting and formatting (replaces ESLint/Prettier for most tasks)
 - **Bun** - Package manager and runtime
-- **shadcn/ui** - Component library with Radix UI primitives
-- **Supabase** - Database and backend services
+- **shadcn/ui** - Component library built on Radix UI primitives
+- **Supabase** - Database with TypeScript types and RLS
 - **Clerk** - Authentication and user management
 
 ### Project Structure
 
 ```bash
 src/
-├── app/                 # Next.js App Router
-│   ├── (clerk)/        # Clerk auth route group
-│   ├── (landing)/      # Landing page route group
-│   ├── _components/     # Shared components
-│   ├── api/trpc/        # tRPC API endpoint
-│   ├── layout.tsx       # Root layout
-│   └── page.tsx         # Home page
-├── components/          # Application components
-│   ├── ui/             # shadcn/ui components
-│   └── stats-card.tsx  # Custom debt statistics card
-├── lib/                # Shared utilities
-│   └── utils.ts        # cn() helper for class merging
-├── server/              # Server-side code
-│   └── api/            # tRPC API definition
-│       ├── root.ts     # Main router
-│       ├── trpc.ts     # tRPC setup
-│       └── routers/    # API route handlers
-├── trpc/               # Client-side tRPC setup
-│   ├── react.tsx       # React Query provider
-│   ├── query-client.ts # Query client config
-│   └── server.ts       # Server-side caller
-├── env.js              # Environment validation
-└── styles/             # Global styles
+├── app/                    # Next.js App Router
+│   ├── dashboard/          # Protected dashboard routes
+│   │   ├── _components/    # Dashboard-specific components
+│   │   ├── debts/         # Debt management pages
+│   │   └── strategies/    # Payment strategy pages
+│   ├── sign-in/           # Clerk authentication routes
+│   ├── sign-up/
+│   ├── showcase/          # Theme and component showcase
+│   └── api/trpc/          # tRPC API endpoint
+├── components/            # Shared UI components
+│   ├── ui/               # shadcn/ui components
+│   └── [feature].tsx     # Custom components
+├── lib/                  # Shared utilities and configurations
+│   ├── algorithms/       # Debt repayment algorithms
+│   ├── hooks/           # Custom React hooks
+│   └── supabase/        # Database client configurations
+├── server/api/          # tRPC server-side implementation
+│   ├── routers/         # API route handlers
+│   │   ├── debt/        # Debt CRUD operations
+│   │   ├── payment/     # Payment tracking
+│   │   └── paymentPlan/ # Strategy optimization
+│   ├── root.ts          # Main tRPC router
+│   └── trpc.ts          # tRPC configuration
+├── trpc/                # Client-side tRPC setup
+├── types/               # TypeScript type definitions
+│   └── database.types.ts # Generated Supabase types
+└── env.js               # Environment variable validation
 ```
 
 ## tRPC Implementation
 
-### Server Setup
+### Server Configuration
 
-- **Context**: Provides `userId` from Clerk auth and `supabase` client in `src/server/api/trpc.ts`
-- **Authentication**: Uses Clerk's `auth()` function for user authentication
-- **Database**: Supabase client with service role key for server-side operations
-- **Middleware**: Built-in timing middleware with artificial dev delay (100-500ms in dev)
-- **Error Handling**: Zod validation errors are formatted and passed to client
-- **Transformer**: SuperJSON for serialization of complex types
-- **Procedures**: Both `publicProcedure` and `protectedProcedure` available
+- **Context**: Provides authenticated `userId` via Clerk and `supabase` service client
+- **Procedures**: `publicProcedure` and `protectedProcedure` with automatic auth validation
+- **Middleware**: Development timing simulation (100-500ms delay)
+- **Validation**: Zod schemas for all inputs with automatic error handling
+- **Transform**: SuperJSON for Date/BigInt serialization
 
-### Client Setup
+### Client Configuration
 
-- **Provider**: `TRPCReactProvider` wraps app with React Query
-- **Singleton Pattern**: Query client uses singleton in browser, new instance on server
-- **Logging**: Enabled in development and for errors
-- **Batch Streaming**: Uses `httpBatchStreamLink` for efficient requests
+- **Provider**: `TRPCReactProvider` with React Query integration
+- **Links**: HTTP batch streaming for optimized requests
+- **Caching**: React Query with singleton pattern for browser/server consistency
 
-### Adding New API Routes
+### Current API Routes
 
-1. Create router in `src/server/api/routers/`
-2. Export procedures using `publicProcedure` or `protectedProcedure`
-3. Add router to `appRouter` in `src/server/api/root.ts`
-4. Types are automatically inferred via `RouterInputs` and `RouterOutputs`
-
-### Existing API Routes
-
-- **debt**: Debt management operations (create, read, update, delete debts)
-- **payment**: Payment tracking and history
-- **paymentPlan**: Payment strategy optimization (Avalanche/Snowball methods)
-- **post**: Example router (can be removed when no longer needed)
-
-## Environment Variables
-
-Environment validation is handled by `@t3-oss/env-nextjs` in `src/env.js`. Required environment variables:
-
-**Server Variables:**
-
-- `CLERK_SECRET_KEY` - Clerk authentication secret key
-- `CLERK_WEBHOOK_SECRET` - Clerk webhook secret for secure callbacks
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key for server-side operations
-
-**Client Variables:**
-
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key for client-side auth
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key for client-side operations
-
-Configuration pattern:
-
-- Server variables: Define in `server` object
-- Client variables: Define in `client` object (must be prefixed with `NEXT_PUBLIC_`)
-- Add to `runtimeEnv` object for runtime access
-- Use `SKIP_ENV_VALIDATION=1` to skip validation during builds
-
-## Code Quality
-
-- **Biome**: Configured in `biome.jsonc` with strict rules
-- **TypeScript**: Strict mode enabled
-- **Import Organization**: Auto-organized via Biome
-- **CSS Classes**: Sorted automatically for Tailwind (supports `clsx`, `cva`, `cn`)
-
-## UI Components
-
-### shadcn/ui Integration
-
-- **Component Library**: Built on Radix UI primitives with Tailwind CSS
-- **Utility Function**: `cn()` in `src/lib/utils.ts` combines `clsx` and `tailwind-merge`
-- **Variants**: Uses `class-variance-authority` for component variants
-- **Composition**: Components support `asChild` prop via `@radix-ui/react-slot`
-
-### Component Patterns
-
-- All UI components use the `cn()` utility for class merging
-- Variant-based styling with `cva()` for consistent component APIs
-- Dark mode support built into component variants
-- Focus and accessibility states handled automatically
-
-## Path Aliases
-
-The project uses TypeScript path aliases configured in `tsconfig.json`:
-
-- `~/*` maps to `./src/*`
-
-## Authentication Architecture
-
-The project is configured for dual authentication providers:
-
-- **Supabase**: Database-integrated auth with `@supabase/ssr` and `@supabase/supabase-js`
-- **Clerk**: Modern auth provider with `@clerk/nextjs`
-
-The current `src/env.js` shows Supabase configuration, but Clerk is available as a dependency.
-
-## Database Integration
-
-Supabase client configuration is available in `src/lib/supabase/`:
-
-- `client.ts` - Browser client
-- `server.ts` - Server-side client
-- `middleware.ts` - Middleware integration
-
-## Development Notes
-
-- Uses Turbo mode for faster development builds
-- Artificial delay in tRPC procedures during development to simulate network latency (100-500ms)
-- All tRPC procedures are logged with execution timing
-- Git VCS integration enabled in Biome configuration
-- `tw-animate-css` available for advanced animations
-- Jest configured with Next.js integration and jsdom environment
-- Test setup includes path aliases and coverage collection
-- Husky and lint-staged configured for pre-commit hooks
+- `debt` - CRUD operations for debt management
+- `payment` - Payment history and tracking
+- `paymentPlan` - Strategy optimization (Avalanche/Snowball algorithms)
+- `post` - Example router (legacy, can be removed)
 
 ## Database Schema
 
-The application uses Supabase with TypeScript types generated from the database schema. Key concepts:
+Supabase PostgreSQL with generated TypeScript types in `src/types/database.types.ts`:
 
-- Database types are defined in `src/types/db.ts` (generated from Supabase)
-- Supabase client is configured for both client-side and server-side use
-- Row Level Security (RLS) should be enabled for user data isolation
-- Database migrations managed through Supabase dashboard or CLI
+**Core Tables:**
 
-## Core Business Logic
+- `debts` - User debts with balance, interest rate, minimum payments
+- `payments` - Payment history linked to specific debts
+- `payment_plans` - Strategy configurations and budgets
 
-Based on the PRD, the application implements:
+**Authentication:**
 
-1. **Debt Management**: Track multiple debt types with balance, APR, minimum payments
-2. **Payment Strategies**:
-   - Avalanche: Pay highest interest rate first
-   - Snowball: Pay smallest balance first
-   - Custom: User-defined prioritization
-3. **Progress Visualization**: Charts showing debt reduction over time
-4. **Payment Scheduling**: Due date reminders and payment tracking
+- Row Level Security (RLS) enforced via `clerk_user_id`
+- Server-side operations use service role key
+- Client-side operations use anon key with RLS
+
+## Environment Variables
+
+Validation via `@t3-oss/env-nextjs` in `src/env.js`:
+
+**Required Server:**
+
+- `CLERK_SECRET_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+**Required Client:**
+
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+## Code Quality Tools
+
+### Biome Configuration (`biome.jsonc`)
+
+- Linting with custom rules for React/TypeScript
+- Auto-formatting with import organization
+- Tailwind class sorting for `clsx`, `cva`, `cn` functions
+- Git integration for VCS-aware linting
+
+### Additional Tools
+
+- **ESLint**: Next.js configuration with TypeScript rules
+- **Prettier**: Code formatting with Tailwind plugin
+- **TypeScript**: Strict mode with path aliases (`~/*` → `./src/*`)
+- **Jest**: Testing with Next.js integration and jsdom environment
+
+## UI Architecture
+
+### Component System
+
+- **shadcn/ui**: Radix UI primitives with Tailwind styling
+- **Variants**: `class-variance-authority` for consistent component APIs
+- **Theming**: Dark mode support with `next-themes`
+- **Utility**: `cn()` function combines `clsx` and `tailwind-merge`
+
+### Motion and Animation
+
+- **Motion**: Modern animation library (replaces Framer Motion)
+- **tw-animate-css**: Extended Tailwind animations
+
+## Business Logic
+
+### Debt Repayment Algorithms (`src/lib/algorithms/`)
+
+- **Avalanche**: Prioritize highest interest rate debts
+- **Snowball**: Prioritize smallest balance debts
+- **Calculator**: Payment timeline and savings calculations
+
+### Dashboard Features
+
+- Real-time debt tracking with progress visualization
+- Payment strategy comparison and optimization
+- Due date reminders and payment scheduling
+- Budget management and extra payment allocation

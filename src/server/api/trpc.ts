@@ -26,107 +26,107 @@ import { createClient } from "~/lib/supabase/server";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-	const { userId } = await auth();
+  const { userId } = await auth();
 
-	// Create Supabase client with service role key for server-side operations
-	// const supabase = createClient<Database>(
-	// 	env.NEXT_PUBLIC_SUPABASE_URL,
-	// 	env.SUPABASE_SERVICE_ROLE_KEY,
-	// 	{
-	// 		async accessToken() {
-	// 			return (await auth()).getToken();
-	// 		},
-	// 		auth: {
-	// 			autoRefreshToken: false,
-	// 			persistSession: false,
-	// 		},
-	// 	},
-	// );
+  // Create Supabase client with service role key for server-side operations
+  // const supabase = createClient<Database>(
+  // 	env.NEXT_PUBLIC_SUPABASE_URL,
+  // 	env.SUPABASE_SERVICE_ROLE_KEY,
+  // 	{
+  // 		async accessToken() {
+  // 			return (await auth()).getToken();
+  // 		},
+  // 		auth: {
+  // 			autoRefreshToken: false,
+  // 			persistSession: false,
+  // 		},
+  // 	},
+  // );
 
-	const supabase = await createClient();
+  const supabase = await createClient();
 
-	return {
-		...opts,
-		userId,
-		supabase,
-	};
+  return {
+    ...opts,
+    userId,
+    supabase,
+  };
 };
 
 /**
  * Global error handler for tRPC procedures
  */
 function handleTRPCError(error: unknown, path: string): TRPCError {
-	console.error(`[TRPC Error] ${path}:`, error);
+  console.error(`[TRPC Error] ${path}:`, error);
 
-	// Database errors
-	if (error && typeof error === "object" && "code" in error) {
-		const dbError = error as { code: string; message: string };
+  // Database errors
+  if (error && typeof error === "object" && "code" in error) {
+    const dbError = error as { code: string; message: string };
 
-		// Supabase/PostgreSQL error codes
-		switch (dbError.code) {
-			case "23505": // unique violation
-				return new TRPCError({
-					code: "CONFLICT",
-					message: "A record with these details already exists",
-					cause: error,
-				});
-			case "23503": // foreign key violation
-				return new TRPCError({
-					code: "BAD_REQUEST",
-					message: "Invalid reference to related data",
-					cause: error,
-				});
-			case "23502": // not null violation
-				return new TRPCError({
-					code: "BAD_REQUEST",
-					message: "Required field is missing",
-					cause: error,
-				});
-			default:
-				return new TRPCError({
-					code: "INTERNAL_SERVER_ERROR",
-					message: "Database operation failed",
-					cause: error,
-				});
-		}
-	}
+    // Supabase/PostgreSQL error codes
+    switch (dbError.code) {
+      case "23505": // unique violation
+        return new TRPCError({
+          code: "CONFLICT",
+          message: "A record with these details already exists",
+          cause: error,
+        });
+      case "23503": // foreign key violation
+        return new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid reference to related data",
+          cause: error,
+        });
+      case "23502": // not null violation
+        return new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Required field is missing",
+          cause: error,
+        });
+      default:
+        return new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Database operation failed",
+          cause: error,
+        });
+    }
+  }
 
-	// Network/timeout errors
-	if (error instanceof Error) {
-		if (
-			error.message.includes("timeout") ||
-			error.message.includes("TIMEOUT")
-		) {
-			return new TRPCError({
-				code: "TIMEOUT",
-				message: "Request timed out. Please try again.",
-				cause: error,
-			});
-		}
+  // Network/timeout errors
+  if (error instanceof Error) {
+    if (
+      error.message.includes("timeout") ||
+      error.message.includes("TIMEOUT")
+    ) {
+      return new TRPCError({
+        code: "TIMEOUT",
+        message: "Request timed out. Please try again.",
+        cause: error,
+      });
+    }
 
-		if (
-			error.message.includes("network") ||
-			error.message.includes("NETWORK")
-		) {
-			return new TRPCError({
-				code: "INTERNAL_SERVER_ERROR",
-				message: "Network error occurred. Please check your connection.",
-				cause: error,
-			});
-		}
-	}
+    if (
+      error.message.includes("network") ||
+      error.message.includes("NETWORK")
+    ) {
+      return new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Network error occurred. Please check your connection.",
+        cause: error,
+      });
+    }
+  }
 
-	// Already a tRPC error
-	if (error instanceof TRPCError) {
-		return error;
-	}
+  // Already a tRPC error
+  if (error instanceof TRPCError) {
+    return error;
+  }
 
-	// Generic error fallback
-	return new TRPCError({
-		code: "INTERNAL_SERVER_ERROR",
-		message: "An unexpected error occurred",
-		cause: error,
-	});
+  // Generic error fallback
+  return new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "An unexpected error occurred",
+    cause: error,
+  });
 }
 
 /**
@@ -137,18 +137,18 @@ function handleTRPCError(error: unknown, path: string): TRPCError {
  * errors on the backend.
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
-	transformer: superjson,
-	errorFormatter({ shape, error }) {
-		return {
-			...shape,
-			data: {
-				...shape.data,
-				zodError:
-					error.cause instanceof z.ZodError ? error.cause.flatten() : null,
-				timestamp: new Date().toISOString(),
-			},
-		};
-	},
+  transformer: superjson,
+  errorFormatter({ shape, error }) {
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.cause instanceof z.ZodError ? error.cause.flatten() : null,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  },
 });
 
 /**
@@ -176,33 +176,33 @@ export const createTRPCRouter = t.router;
  * Enhanced logging middleware for debugging and monitoring
  */
 const loggingMiddleware = t.middleware(async ({ next, path, type, input }) => {
-	const start = Date.now();
-	const requestId = Math.random().toString(36).substr(2, 9);
+  const start = Date.now();
+  const requestId = Math.random().toString(36).substr(2, 9);
 
-	console.log(`[TRPC] ${requestId} - ${type} ${path} - Started`, {
-		input: process.env.NODE_ENV === "development" ? input : "[HIDDEN]",
-		timestamp: new Date().toISOString(),
-	});
+  console.log(`[TRPC] ${requestId} - ${type} ${path} - Started`, {
+    input: process.env.NODE_ENV === "development" ? input : "[HIDDEN]",
+    timestamp: new Date().toISOString(),
+  });
 
-	const result = await next().catch((error) => {
-		const handledError = handleTRPCError(error, path);
+  const result = await next().catch((error) => {
+    const handledError = handleTRPCError(error, path);
 
-		console.error(`[TRPC] ${requestId} - ${type} ${path} - Error:`, {
-			error: handledError.message,
-			code: handledError.code,
-			duration: Date.now() - start,
-			timestamp: new Date().toISOString(),
-		});
+    console.error(`[TRPC] ${requestId} - ${type} ${path} - Error:`, {
+      error: handledError.message,
+      code: handledError.code,
+      duration: Date.now() - start,
+      timestamp: new Date().toISOString(),
+    });
 
-		throw handledError;
-	});
+    throw handledError;
+  });
 
-	const duration = Date.now() - start;
-	console.log(
-		`[TRPC] ${requestId} - ${type} ${path} - Completed in ${duration}ms`,
-	);
+  const duration = Date.now() - start;
+  console.log(
+    `[TRPC] ${requestId} - ${type} ${path} - Completed in ${duration}ms`,
+  );
 
-	return result;
+  return result;
 });
 
 /**
@@ -212,27 +212,27 @@ const loggingMiddleware = t.middleware(async ({ next, path, type, input }) => {
  * network latency that would occur in production but not in local development.
  */
 const timingMiddleware = t.middleware(async ({ next }) => {
-	if (t._config.isDev) {
-		// artificial delay in dev - reduced for better development experience
-		const waitMs = Math.floor(Math.random() * 200) + 50;
-		await new Promise((resolve) => setTimeout(resolve, waitMs));
-	}
+  if (t._config.isDev) {
+    // artificial delay in dev - reduced for better development experience
+    const waitMs = Math.floor(Math.random() * 200) + 50;
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
+  }
 
-	return next();
+  return next();
 });
 
 /**
  * Rate limiting middleware to prevent abuse
  */
 const rateLimitMiddleware = t.middleware(async ({ next }) => {
-	// In production, you might want to implement proper rate limiting
-	// For now, we'll just log potentially suspicious activity
-	if (process.env.NODE_ENV === "production") {
-		// You could implement rate limiting logic here
-		// For example, using Redis to track requests per user/IP
-	}
+  // In production, you might want to implement proper rate limiting
+  // For now, we'll just log potentially suspicious activity
+  if (process.env.NODE_ENV === "production") {
+    // You could implement rate limiting logic here
+    // For example, using Redis to track requests per user/IP
+  }
 
-	return next();
+  return next();
 });
 
 /**
@@ -243,9 +243,9 @@ const rateLimitMiddleware = t.middleware(async ({ next }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure
-	.use(loggingMiddleware)
-	.use(timingMiddleware)
-	.use(rateLimitMiddleware);
+  .use(loggingMiddleware)
+  .use(timingMiddleware)
+  .use(rateLimitMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -256,27 +256,27 @@ export const publicProcedure = t.procedure
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure
-	.use(loggingMiddleware)
-	.use(timingMiddleware)
-	.use(rateLimitMiddleware)
-	.use(({ ctx, next }) => {
-		if (!ctx.userId) {
-			throw new TRPCError({
-				code: "UNAUTHORIZED",
-				message: "You must be logged in to perform this action",
-			});
-		}
-		return next({
-			ctx: {
-				...ctx,
-				userId: ctx.userId,
-			},
-		});
-	});
+  .use(loggingMiddleware)
+  .use(timingMiddleware)
+  .use(rateLimitMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.userId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You must be logged in to perform this action",
+      });
+    }
+    return next({
+      ctx: {
+        ...ctx,
+        userId: ctx.userId,
+      },
+    });
+  });
 
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 export type ProtectedTRPCContext = TRPCContext & {
-	userId: NonNullable<TRPCContext["userId"]>;
+  userId: NonNullable<TRPCContext["userId"]>;
 };
 
 // Export error handler for use in other parts of the application

@@ -1,305 +1,208 @@
 import type { ProtectedTRPCContext } from "~/server/api/trpc";
 import {
-	type PaymentPlanUpdate,
-	transformPaymentPlanFromDb,
+  type PaymentPlanUpdate,
+  transformPaymentPlanFromDb,
 } from "~/types/db.helpers";
 import type * as Schema from "./paymentPlan.schema";
 
 type HandlerCtx = {
-	ctx: ProtectedTRPCContext;
+  ctx: ProtectedTRPCContext;
 };
 
 type HandlerInput<T> = {
-	input: T;
-	ctx: ProtectedTRPCContext;
+  input: T;
+  ctx: ProtectedTRPCContext;
 };
 
 // Get all payment plans
 export async function getAllPaymentPlans({ ctx }: HandlerCtx) {
-	const { data: user } = await ctx.supabase
-		.from("users")
-		.select("id")
-		.eq("clerk_user_id", ctx.userId)
-		.single();
+  const { data: plans, error } = await ctx.supabase
+    .from("payment_plans")
+    .select("*")
+    .eq("clerk_user_id", ctx.userId)
+    .order("created_at", { ascending: false });
 
-	if (!user) {
-		throw new Error("User not found");
-	}
+  if (error) {
+    throw new Error(`Failed to fetch payment plans: ${error.message}`);
+  }
 
-	const { data: plans, error } = await ctx.supabase
-		.from("payment_plans")
-		.select("*")
-		.eq("user_id", user.id)
-		.order("created_at", { ascending: false });
-
-	if (error) {
-		throw new Error(`Failed to fetch payment plans: ${error.message}`);
-	}
-
-	return plans.map(transformPaymentPlanFromDb);
+  return plans.map(transformPaymentPlanFromDb);
 }
 
 // Get a payment plan by ID
 export async function getPaymentPlanById({
-	ctx,
-	input,
+  ctx,
+  input,
 }: HandlerInput<Schema.TGetPaymentPlanById>) {
-	const { data: user } = await ctx.supabase
-		.from("users")
-		.select("id")
-		.eq("clerk_user_id", ctx.userId)
-		.single();
+  const { data: plan, error } = await ctx.supabase
+    .from("payment_plans")
+    .select("*")
+    .eq("id", input.id)
+    .eq("clerk_user_id", ctx.userId)
+    .single();
 
-	if (!user) {
-		throw new Error("User not found");
-	}
+  if (error) {
+    throw new Error(`Failed to fetch payment plan: ${error.message}`);
+  }
 
-	const { data: plan, error } = await ctx.supabase
-		.from("payment_plans")
-		.select("*")
-		.eq("id", input.id)
-		.eq("user_id", user.id)
-		.single();
+  if (!plan) {
+    throw new Error(
+      "Payment plan not found or you don't have permission to access it",
+    );
+  }
 
-	if (error) {
-		throw new Error(`Failed to fetch payment plan: ${error.message}`);
-	}
-
-	if (!plan) {
-		throw new Error(
-			"Payment plan not found or you don't have permission to access it",
-		);
-	}
-
-	return transformPaymentPlanFromDb(plan);
+  return transformPaymentPlanFromDb(plan);
 }
 
 // Get the active payment plan
 export async function getActivePaymentPlan({ ctx }: HandlerCtx) {
-	const { data: user } = await ctx.supabase
-		.from("users")
-		.select("id")
-		.eq("clerk_user_id", ctx.userId)
-		.single();
+  const { data: plan, error } = await ctx.supabase
+    .from("payment_plans")
+    .select("*")
+    .eq("clerk_user_id", ctx.userId)
+    .eq("is_active", true)
+    .single();
 
-	if (!user) {
-		throw new Error("User not found");
-	}
+  if (error && error.code !== "PGRST116") {
+    throw new Error(`Failed to fetch active payment plan: ${error.message}`);
+  }
 
-	const { data: plan, error } = await ctx.supabase
-		.from("payment_plans")
-		.select("*")
-		.eq("user_id", user.id)
-		.eq("is_active", true)
-		.single();
-
-	if (error && error.code !== "PGRST116") {
-		throw new Error(`Failed to fetch active payment plan: ${error.message}`);
-	}
-
-	return plan ? transformPaymentPlanFromDb(plan) : null;
+  return plan ? transformPaymentPlanFromDb(plan) : null;
 }
 
 export async function createPaymentPlan({
-	ctx,
-	input,
+  ctx,
+  input,
 }: HandlerInput<Schema.TCreatePaymentPlan>) {
-	const { data: user } = await ctx.supabase
-		.from("users")
-		.select("id")
-		.eq("clerk_user_id", ctx.userId)
-		.single();
+  // If this plan is being set as active, deactivate all other plans
+  if (input.isActive) {
+    await ctx.supabase
+      .from("payment_plans")
+      .update({ is_active: false })
+      .eq("clerk_user_id", ctx.userId);
+  }
 
-	if (!user) {
-		throw new Error("User not found");
-	}
+  const insertData = {
+    clerk_user_id: ctx.userId,
+    name: input.name,
+    strategy: input.strategy,
+    monthly_budget: input.monthlyBudget,
+    extra_payment: input.extraPayment,
+    target_date: input.targetDate?.toISOString() ?? null,
+    is_active: input.isActive ?? false,
+  };
 
-	// If this plan is being set as active, deactivate all other plans
-	if (input.isActive) {
-		await ctx.supabase
-			.from("payment_plans")
-			.update({ is_active: false })
-			.eq("user_id", user.id);
-	}
+  const { data: plan, error } = await ctx.supabase
+    .from("payment_plans")
+    .insert(insertData)
+    .select("*")
+    .single();
 
-	const insertData = {
-		user_id: user.id,
-		name: input.name,
-		strategy: input.strategy,
-		monthly_budget: input.monthlyBudget,
-		extra_payment: input.extraPayment,
-		target_date: input.targetDate?.toISOString() || null,
-		is_active: input.isActive ?? false,
-	};
+  if (error) {
+    throw new Error(`Failed to create payment plan: ${error.message}`);
+  }
 
-	const { data: plan, error } = await ctx.supabase
-		.from("payment_plans")
-		.insert(insertData)
-		.select("*")
-		.single();
-
-	if (error) {
-		throw new Error(`Failed to create payment plan: ${error.message}`);
-	}
-
-	return transformPaymentPlanFromDb(plan);
+  return transformPaymentPlanFromDb(plan);
 }
 
 export async function updatePaymentPlan({
-	ctx,
-	input,
+  ctx,
+  input,
 }: HandlerInput<Schema.TUpdatePaymentPlan>) {
-	const { data: user } = await ctx.supabase
-		.from("users")
-		.select("id")
-		.eq("clerk_user_id", ctx.userId)
-		.single();
+  const { id, ...updateData } = input;
 
-	if (!user) {
-		throw new Error("User not found");
-	}
+  // If setting this plan as active, deactivate all other plans first
+  if (updateData.isActive === true) {
+    await ctx.supabase
+      .from("payment_plans")
+      .update({ is_active: false })
+      .eq("clerk_user_id", ctx.userId);
+  }
 
-	const { id, ...updateData } = input;
+  const dbUpdateData: PaymentPlanUpdate = {};
+  if (updateData.name !== undefined) dbUpdateData.name = updateData.name;
+  if (updateData.strategy !== undefined) {
+    dbUpdateData.strategy = updateData.strategy;
+  }
+  if (updateData.monthlyBudget !== undefined) {
+    dbUpdateData.monthly_budget = updateData.monthlyBudget;
+  }
+  if (updateData.extraPayment !== undefined) {
+    dbUpdateData.extra_payment = updateData.extraPayment;
+  }
+  if (updateData.targetDate !== undefined) {
+    dbUpdateData.target_date = updateData.targetDate?.toISOString() ?? null;
+  }
+  if (updateData.isActive !== undefined) {
+    dbUpdateData.is_active = updateData.isActive;
+  }
 
-	// If setting this plan as active, deactivate all other plans first
-	if (updateData.isActive === true) {
-		await ctx.supabase
-			.from("payment_plans")
-			.update({ is_active: false })
-			.eq("user_id", user.id);
-	}
+  const { data: plan, error } = await ctx.supabase
+    .from("payment_plans")
+    .update(dbUpdateData)
+    .eq("id", id)
+    .eq("clerk_user_id", ctx.userId)
+    .select("*")
+    .single();
 
-	const dbUpdateData: PaymentPlanUpdate = {};
-	if (updateData.name !== undefined) dbUpdateData.name = updateData.name;
-	if (updateData.strategy !== undefined) {
-		dbUpdateData.strategy = updateData.strategy;
-	}
-	if (updateData.monthlyBudget !== undefined) {
-		dbUpdateData.monthly_budget = updateData.monthlyBudget;
-	}
-	if (updateData.extraPayment !== undefined) {
-		dbUpdateData.extra_payment = updateData.extraPayment;
-	}
-	if (updateData.targetDate !== undefined) {
-		dbUpdateData.target_date = updateData.targetDate?.toISOString() || null;
-	}
-	if (updateData.isActive !== undefined) {
-		dbUpdateData.is_active = updateData.isActive;
-	}
+  if (error) {
+    throw new Error(`Failed to update payment plan: ${error.message}`);
+  }
 
-	const { data: plan, error } = await ctx.supabase
-		.from("payment_plans")
-		.update(dbUpdateData)
-		.eq("id", id)
-		.eq("user_id", user.id)
-		.select("*")
-		.single();
+  if (!plan) {
+    throw new Error(
+      "Payment plan not found or you don't have permission to update it",
+    );
+  }
 
-	if (error) {
-		throw new Error(`Failed to update payment plan: ${error.message}`);
-	}
-
-	if (!plan) {
-		throw new Error(
-			"Payment plan not found or you don't have permission to update it",
-		);
-	}
-
-	return transformPaymentPlanFromDb(plan);
+  return transformPaymentPlanFromDb(plan);
 }
 
 export async function deletePaymentPlan({
-	ctx,
-	input,
+  ctx,
+  input,
 }: HandlerInput<Schema.TDeletePaymentPlan>) {
-	const { data: user } = await ctx.supabase
-		.from("users")
-		.select("id")
-		.eq("clerk_user_id", ctx.userId)
-		.single();
+  const { error } = await ctx.supabase
+    .from("payment_plans")
+    .delete()
+    .eq("id", input.id)
+    .eq("clerk_user_id", ctx.userId);
 
-	if (!user) {
-		throw new Error("User not found");
-	}
+  if (error) {
+    throw new Error(`Failed to delete payment plan: ${error.message}`);
+  }
 
-	// Verify the plan belongs to the user
-	const { data: plan } = await ctx.supabase
-		.from("payment_plans")
-		.select("id, is_active")
-		.eq("id", input.id)
-		.eq("user_id", user.id)
-		.single();
-
-	if (!plan) {
-		throw new Error(
-			"Payment plan not found or you don't have permission to delete it",
-		);
-	}
-
-	// Prevent deletion of active plan without confirmation
-	if (plan.is_active) {
-		throw new Error(
-			"Cannot delete an active payment plan. Please deactivate it first.",
-		);
-	}
-
-	const { error } = await ctx.supabase
-		.from("payment_plans")
-		.delete()
-		.eq("id", input.id);
-
-	if (error) {
-		throw new Error(`Failed to delete payment plan: ${error.message}`);
-	}
-
-	return { success: true };
+  return { success: true };
 }
 
 export async function activatePaymentPlan({
-	ctx,
-	input,
+  ctx,
+  input,
 }: HandlerInput<Schema.TActivatePaymentPlan>) {
-	const { data: user } = await ctx.supabase
-		.from("users")
-		.select("id")
-		.eq("clerk_user_id", ctx.userId)
-		.single();
+  // First, deactivate all existing plans
+  await ctx.supabase
+    .from("payment_plans")
+    .update({ is_active: false })
+    .eq("clerk_user_id", ctx.userId);
 
-	if (!user) {
-		throw new Error("User not found");
-	}
+  // Then activate the specified plan
+  const { data: plan, error } = await ctx.supabase
+    .from("payment_plans")
+    .update({ is_active: true })
+    .eq("id", input.id)
+    .eq("clerk_user_id", ctx.userId)
+    .select("*")
+    .single();
 
-	// Verify the plan belongs to the user
-	const { data: plan } = await ctx.supabase
-		.from("payment_plans")
-		.select("id")
-		.eq("id", input.id)
-		.eq("user_id", user.id)
-		.single();
+  if (error) {
+    throw new Error(`Failed to activate payment plan: ${error.message}`);
+  }
 
-	if (!plan) {
-		throw new Error(
-			"Payment plan not found or you don't have permission to activate it",
-		);
-	}
+  if (!plan) {
+    throw new Error(
+      "Payment plan not found or you don't have permission to activate it",
+    );
+  }
 
-	// Deactivate all plans for this user
-	await ctx.supabase
-		.from("payment_plans")
-		.update({ is_active: false })
-		.eq("user_id", user.id);
-
-	// Activate the selected plan
-	const { data: activatedPlan, error } = await ctx.supabase
-		.from("payment_plans")
-		.update({ is_active: true })
-		.eq("id", input.id)
-		.select("*")
-		.single();
-
-	if (error) {
-		throw new Error(`Failed to activate payment plan: ${error.message}`);
-	}
-
-	return transformPaymentPlanFromDb(activatedPlan);
+  return transformPaymentPlanFromDb(plan);
 }

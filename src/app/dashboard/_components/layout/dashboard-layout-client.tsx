@@ -5,23 +5,23 @@ import { DashboardHeader } from "./dashboard-header";
 import { DashboardNav } from "./dashboard-nav";
 
 export function DashboardLayoutClient({
-	children,
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-	const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-	return (
-		<div className="min-h-screen bg-background">
-			<DashboardNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-			<div className="lg:pl-72">
-				<DashboardHeader setSidebarOpen={setSidebarOpen} />
-				<main className="py-6">
-					<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-						{children}
-					</div>
-				</main>
-			</div>
-		</div>
-	);
+  return (
+    <div className="bg-background min-h-screen">
+      <DashboardNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="lg:pl-72">
+        <DashboardHeader setSidebarOpen={setSidebarOpen} />
+        <main className="py-6">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
 }

@@ -3,15 +3,15 @@ import { redirect } from "next/navigation";
 import { DashboardLayoutClient } from "./_components/layout/dashboard-layout-client";
 
 export default async function DashboardLayout({
-	children,
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-	const { userId } = await auth();
+  const { userId } = await auth();
 
-	if (!userId) {
-		redirect("/sign-in");
-	}
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
-	return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
+  return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
 }
