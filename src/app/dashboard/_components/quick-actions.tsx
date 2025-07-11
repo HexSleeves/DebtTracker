@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, DollarSign, TrendingUp } from "lucide-react";
+import { CreditCard, DollarSign, Plus, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton, {
   type ActionItem,
@@ -53,7 +53,7 @@ export function QuickActions() {
         ctx.setIsOpen(false);
         setIsDebtDialogOpen(true);
       },
-      color: "bg-info hover:bg-info/90 text-info-foreground",
+      color: "interactive-primary hover-lift",
     },
     {
       icon: <DollarSign size={20} />,
@@ -62,13 +62,13 @@ export function QuickActions() {
         ctx.setIsOpen(false);
         setIsLogPaymentDialogOpen(true);
       },
-      color: "bg-success hover:bg-success/90 text-success-foreground",
+      color: "interactive-success hover-lift",
     },
     {
       icon: <TrendingUp size={20} />,
       label: "View Strategies",
       href: "/dashboard/strategies",
-      color: "bg-primary hover:bg-primary/90 text-primary-foreground",
+      color: "interactive-warning hover-lift",
     },
   ];
 
@@ -78,10 +78,12 @@ export function QuickActions() {
 
       {/* Add Debt Dialog */}
       <Dialog open={isDebtDialogOpen} onOpenChange={setIsDebtDialogOpen}>
-        <DialogContent className="border-l-info max-w-md border-l-4">
+        <DialogContent className="border-l-primary from-primary-50/20 max-w-md border-l-4 bg-gradient-to-br to-transparent">
           <DialogHeader>
-            <DialogTitle className="text-info flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+            <DialogTitle className="text-primary flex items-center gap-2">
+              <div className="bg-primary/10 rounded-full p-2">
+                <Plus className="h-5 w-5" />
+              </div>
               Add New Debt
             </DialogTitle>
             <DialogDescription>
@@ -101,10 +103,12 @@ export function QuickActions() {
         open={isLogPaymentDialogOpen}
         onOpenChange={setIsLogPaymentDialogOpen}
       >
-        <DialogContent className="border-l-success max-w-md border-l-4">
+        <DialogContent className="border-l-success from-success-50/20 max-w-md border-l-4 bg-gradient-to-br to-transparent">
           <DialogHeader>
             <DialogTitle className="text-success flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
+              <div className="bg-success/10 rounded-full p-2">
+                <DollarSign className="h-5 w-5" />
+              </div>
               Log Payment
             </DialogTitle>
             <DialogDescription>

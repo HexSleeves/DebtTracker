@@ -1,4 +1,5 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 export const StatCard: React.FC<{
   title: string;
@@ -7,7 +8,16 @@ export const StatCard: React.FC<{
   icon: React.ReactNode;
   trend?: "up" | "down" | "neutral";
   color?: "blue" | "green" | "red" | "amber";
-}> = ({ title, value, subtitle, icon, trend = "neutral", color = "blue" }) => {
+  className?: string;
+}> = ({
+  title,
+  value,
+  subtitle,
+  icon,
+  trend = "neutral",
+  color = "blue",
+  className,
+}) => {
   const colorClasses = {
     blue: "bg-primary-50 border-primary-200 text-primary-700",
     green: "bg-success-50 border-success-100 text-success-700",
@@ -17,7 +27,11 @@ export const StatCard: React.FC<{
 
   return (
     <div
-      className={`rounded-lg border-2 p-6 ${colorClasses[color]} transition-theme hover:shadow-md`}
+      className={cn(
+        "transition-theme rounded-lg border-2 p-6 hover:shadow-md",
+        colorClasses[color],
+        className,
+      )}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">

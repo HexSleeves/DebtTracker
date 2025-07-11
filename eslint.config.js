@@ -1,4 +1,5 @@
 import { FlatCompat } from "@eslint/eslintrc";
+import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 
 const compat = new FlatCompat({
@@ -9,7 +10,9 @@ export default tseslint.config(
   {
     ignores: [".next", ".cursor", ".claude"],
   },
-  ...compat.extends("next/core-web-vitals"),
+  // ...compat.extends("next/core-web-vitals"),
+  ...compat.extends("plugin:@next/next/recommended"),
+  reactHooks.configs["recommended-latest"],
   {
     files: ["**/*.ts", "**/*.tsx"],
     extends: [

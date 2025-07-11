@@ -3,7 +3,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "~/types/database.types";
 import { env } from "../../env";
 
-export function createClient() {
+export function useSupabaseClient() {
   const { session } = useSession();
 
   return createBrowserClient<Database>(

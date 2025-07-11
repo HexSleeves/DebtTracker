@@ -4,9 +4,11 @@ import { Calendar, CreditCard, DollarSign, TrendingDown } from "lucide-react";
 import { motion } from "motion/react";
 import { memo, useMemo } from "react";
 import { useRenderTime } from "~/components/performance-monitor";
+import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { formatCurrency } from "~/lib/currency";
 import { useDebtMetrics } from "~/lib/hooks/use-debt-strategy";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
@@ -66,6 +68,97 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
     }).length;
   }, [debts]);
 
+  // Enhanced status calculation functions
+  const getInterestRateStatus = (rate: number) => {
+    if (rate >= 20)
+      return {
+        color: "text-error",
+        bg: "bg-error/10",
+        label: "Critical",
+        severity: "critical",
+      };
+    if (rate >= 15)
+      return {
+        color: "text-error",
+        bg: "bg-error/10",
+        label: "High",
+        severity: "high",
+      };
+    if (rate >= 10)
+      return {
+        color: "text-warning",
+        bg: "bg-warning/10",
+        label: "Moderate",
+        severity: "moderate",
+      };
+    return {
+      color: "text-success",
+      bg: "bg-success/10",
+      label: "Low",
+      severity: "low",
+    };
+  };
+
+  const getPaymentUrgencyStatus = (count: number) => {
+    if (count === 0)
+      return {
+        color: "text-success",
+        bg: "bg-success/10",
+        label: "All Clear",
+        severity: "low",
+      };
+    if (count <= 2)
+      return {
+        color: "text-info",
+        bg: "bg-info/10",
+        label: "Manageable",
+        severity: "moderate",
+      };
+    if (count <= 4)
+      return {
+        color: "text-warning",
+        bg: "bg-warning/10",
+        label: "Busy Week",
+        severity: "high",
+      };
+    return {
+      color: "text-error",
+      bg: "bg-error/10",
+      label: "Critical",
+      severity: "critical",
+    };
+  };
+
+  const getDebtLoadStatus = (totalDebt: number) => {
+    if (totalDebt === 0)
+      return {
+        color: "text-success",
+        bg: "bg-success/10",
+        label: "Debt Free",
+        severity: "low",
+      };
+    if (totalDebt < 5000)
+      return {
+        color: "text-info",
+        bg: "bg-info/10",
+        label: "Light Load",
+        severity: "moderate",
+      };
+    if (totalDebt < 25000)
+      return {
+        color: "text-warning",
+        bg: "bg-warning/10",
+        label: "Moderate Load",
+        severity: "high",
+      };
+    return {
+      color: "text-error",
+      bg: "bg-error/10",
+      label: "Heavy Load",
+      severity: "critical",
+    };
+  };
+
   if (isLoading) {
     return (
       <motion.div
@@ -77,16 +170,16 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
         {["total-debt", "minimum-payment", "interest-rate", "due-week"].map(
           (skeletonId, _index) => (
             <motion.div key={skeletonId} variants={cardVariants}>
-              <Card className="animate-pulse">
+              <Card className="hover-lift animate-pulse">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    <div className="h-4 w-24 rounded bg-gray-200" />
+                    <div className="bg-muted h-4 w-24 rounded" />
                   </CardTitle>
-                  <div className="h-4 w-4 rounded bg-gray-200" />
+                  <div className="bg-muted h-4 w-4 rounded" />
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-2 h-8 w-32 rounded bg-gray-200" />
-                  <div className="h-4 w-40 rounded bg-gray-200" />
+                  <div className="bg-muted mb-2 h-8 w-32 rounded" />
+                  <div className="bg-muted h-4 w-40 rounded" />
                 </CardContent>
               </Card>
             </motion.div>
@@ -96,19 +189,11 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
     );
   }
 
-  // Determine interest rate status color
-  const getInterestRateColor = (rate: number) => {
-    if (rate >= 15) return "text-error";
-    if (rate >= 8) return "text-warning";
-    return "text-success";
-  };
-
-  // Determine payment urgency color
-  const getPaymentUrgencyColor = (count: number) => {
-    if (count === 0) return "text-success";
-    if (count <= 2) return "text-info";
-    return "text-warning";
-  };
+  const interestRateStatus = getInterestRateStatus(
+    debtMetrics.weightedAverageInterestRate,
+  );
+  const paymentUrgencyStatus = getPaymentUrgencyStatus(upcomingPayments);
+  const debtLoadStatus = getDebtLoadStatus(debtMetrics.totalDebt);
 
   return (
     <motion.div
@@ -119,16 +204,29 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
     >
       {/* Total Debt */}
       <motion.div variants={cardVariants}>
-        <Card className="hover-lift border-l-primary border-l-4">
+        <Card className="hover-lift border-l-primary from-primary-50/50 border-l-4 bg-gradient-to-br to-transparent">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Debt</CardTitle>
-            <DollarSign className="text-primary h-4 w-4" />
+            <div className="bg-primary/10 rounded-full p-2">
+              <DollarSign className="text-primary h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-primary text-2xl font-bold">
-              {formatCurrency(debtMetrics.totalDebt)}
+            <div className="flex items-center justify-between">
+              <div className="text-primary text-2xl font-bold">
+                {formatCurrency(debtMetrics.totalDebt)}
+              </div>
+              <Badge
+                className={cn(
+                  "text-xs",
+                  debtLoadStatus.bg,
+                  debtLoadStatus.color,
+                )}
+              >
+                {debtLoadStatus.label}
+              </Badge>
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground mt-1 text-xs">
               Across {debts?.length ?? 0} debt
               {(debts?.length ?? 0) !== 1 ? "s" : ""}
             </p>
@@ -138,18 +236,20 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
 
       {/* Monthly Minimum */}
       <motion.div variants={cardVariants}>
-        <Card className="hover-lift border-l-info border-l-4">
+        <Card className="hover-lift border-l-info from-info-50/50 border-l-4 bg-gradient-to-br to-transparent">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Monthly Minimum
             </CardTitle>
-            <CreditCard className="text-info h-4 w-4" />
+            <div className="bg-info/10 rounded-full p-2">
+              <CreditCard className="text-info h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-info text-2xl font-bold">
               {formatCurrency(debtMetrics.totalMinimumPayments)}
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground mt-1 text-xs">
               Required monthly payment
             </p>
           </CardContent>
@@ -159,33 +259,45 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
       {/* Average Interest Rate */}
       <motion.div variants={cardVariants}>
         <Card
-          className={`hover-lift border-l-4 ${
-            debtMetrics.weightedAverageInterestRate >= 15
-              ? "border-l-error"
-              : debtMetrics.weightedAverageInterestRate >= 8
-                ? "border-l-warning"
-                : "border-l-success"
-          }`}
+          className={cn(
+            "hover-lift border-l-4",
+            interestRateStatus.severity === "critical"
+              ? "border-l-error from-error-50/50 bg-gradient-to-br to-transparent"
+              : interestRateStatus.severity === "high"
+                ? "border-l-error from-error-50/30 bg-gradient-to-br to-transparent"
+                : interestRateStatus.severity === "moderate"
+                  ? "border-l-warning from-warning-50/50 bg-gradient-to-br to-transparent"
+                  : "border-l-success from-success-50/50 bg-gradient-to-br to-transparent",
+          )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Average Interest Rate
             </CardTitle>
-            <TrendingDown
-              className={`h-4 w-4 ${getInterestRateColor(
-                debtMetrics.weightedAverageInterestRate,
-              )}`}
-            />
+            <div className={cn("rounded-full p-2", interestRateStatus.bg)}>
+              <TrendingDown
+                className={cn("h-4 w-4", interestRateStatus.color)}
+              />
+            </div>
           </CardHeader>
           <CardContent>
-            <div
-              className={`text-2xl font-bold ${getInterestRateColor(
-                debtMetrics.weightedAverageInterestRate,
-              )}`}
-            >
-              {debtMetrics.weightedAverageInterestRate.toFixed(1)}%
+            <div className="flex items-center justify-between">
+              <div
+                className={cn("text-2xl font-bold", interestRateStatus.color)}
+              >
+                {debtMetrics.weightedAverageInterestRate.toFixed(1)}%
+              </div>
+              <Badge
+                className={cn(
+                  "text-xs",
+                  interestRateStatus.bg,
+                  interestRateStatus.color,
+                )}
+              >
+                {interestRateStatus.label}
+              </Badge>
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground mt-1 text-xs">
               Weighted average APR
             </p>
           </CardContent>
@@ -195,29 +307,41 @@ export const DashboardQuickPreview = memo(function DashboardQuickPreview() {
       {/* Due This Week */}
       <motion.div variants={cardVariants}>
         <Card
-          className={`hover-lift border-l-4 ${
-            upcomingPayments === 0
-              ? "border-l-success"
-              : upcomingPayments <= 2
-                ? "border-l-info"
-                : "border-l-warning"
-          }`}
+          className={cn(
+            "hover-lift border-l-4",
+            paymentUrgencyStatus.severity === "critical"
+              ? "border-l-error from-error-50/50 bg-gradient-to-br to-transparent"
+              : paymentUrgencyStatus.severity === "high"
+                ? "border-l-warning from-warning-50/50 bg-gradient-to-br to-transparent"
+                : paymentUrgencyStatus.severity === "moderate"
+                  ? "border-l-info from-info-50/50 bg-gradient-to-br to-transparent"
+                  : "border-l-success from-success-50/50 bg-gradient-to-br to-transparent",
+          )}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Due This Week</CardTitle>
-            <Calendar
-              className={`h-4 w-4 ${getPaymentUrgencyColor(upcomingPayments)}`}
-            />
+            <div className={cn("rounded-full p-2", paymentUrgencyStatus.bg)}>
+              <Calendar className={cn("h-4 w-4", paymentUrgencyStatus.color)} />
+            </div>
           </CardHeader>
           <CardContent>
-            <div
-              className={`text-2xl font-bold ${getPaymentUrgencyColor(
-                upcomingPayments,
-              )}`}
-            >
-              {upcomingPayments}
+            <div className="flex items-center justify-between">
+              <div
+                className={cn("text-2xl font-bold", paymentUrgencyStatus.color)}
+              >
+                {upcomingPayments}
+              </div>
+              <Badge
+                className={cn(
+                  "text-xs",
+                  paymentUrgencyStatus.bg,
+                  paymentUrgencyStatus.color,
+                )}
+              >
+                {paymentUrgencyStatus.label}
+              </Badge>
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground mt-1 text-xs">
               Payment{upcomingPayments !== 1 ? "s" : ""} due within 7 days
             </p>
           </CardContent>
