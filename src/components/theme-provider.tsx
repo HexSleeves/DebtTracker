@@ -10,22 +10,22 @@ import { useEffect, useState } from "react";
  * Now includes enhanced color system with semantic colors for debt tracking
  */
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  const [mounted, setMounted] = useState(false);
+	const [mounted, setMounted] = useState(false);
 
-  // Ensure hydration compatibility
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+	// Ensure hydration compatibility
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
-  // Add enhanced color system support
-  useEffect(() => {
-    if (mounted) {
-      // Add transition class for smooth theme changes
-      document.documentElement.classList.add("transition-colors");
+	// Add enhanced color system support
+	useEffect(() => {
+		if (mounted) {
+			// Add transition class for smooth theme changes
+			document.documentElement.classList.add("transition-colors");
 
-      // Add custom CSS properties for enhanced theming
-      const style = document.createElement("style");
-      style.textContent = `
+			// Add custom CSS properties for enhanced theming
+			const style = document.createElement("style");
+			style.textContent = `
 				:root {
 					transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 				}
@@ -41,30 +41,30 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 					scroll-behavior: smooth;
 				}
 			`;
-      document.head.appendChild(style);
+			document.head.appendChild(style);
 
-      return () => {
-        document.head.removeChild(style);
-      };
-    }
-  }, [mounted]);
+			return () => {
+				document.head.removeChild(style);
+			};
+		}
+	}, [mounted]);
 
-  if (!mounted) {
-    // Return a placeholder during SSR to prevent hydration mismatch
-    return <div style={{ visibility: "hidden" }}>{children}</div>;
-  }
+	if (!mounted) {
+		// Return a placeholder during SSR to prevent hydration mismatch
+		return <div style={{ visibility: "hidden" }}>{children}</div>;
+	}
 
-  return (
-    <NextThemesProvider
-      enableSystem
-      attribute="class"
-      defaultTheme="system"
-      disableTransitionOnChange={false}
-      storageKey="debt-tracker-theme"
-      themes={["light", "dark", "system"]}
-      {...props}
-    >
-      {children}
-    </NextThemesProvider>
-  );
+	return (
+		<NextThemesProvider
+			enableSystem
+			attribute="class"
+			defaultTheme="system"
+			disableTransitionOnChange={false}
+			storageKey="debt-tracker-theme"
+			themes={["light", "dark", "system"]}
+			{...props}
+		>
+			{children}
+		</NextThemesProvider>
+	);
 }

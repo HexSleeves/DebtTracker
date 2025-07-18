@@ -61,17 +61,20 @@ export function DebtTableSkeleton() {
 // Create column helper for type safety
 const columnHelper = createColumnHelper<Debt>();
 
+// Define proper interface for component props
+interface DebtTableProps {
+  debts: Debt[];
+  setIsAddDialogOpen: (open: boolean) => void;
+  setEditingDebt: (debt: Debt) => void;
+  setDeletingDebtId: (id: string) => void;
+}
+
 export function DebtTable({
   debts,
   setIsAddDialogOpen,
   setEditingDebt,
   setDeletingDebtId,
-}: {
-  debts: Debt[];
-  setIsAddDialogOpen: (open: boolean) => void;
-  setEditingDebt: (debt: Debt) => void;
-  setDeletingDebtId: (id: string) => void;
-}) {
+}: DebtTableProps) {
   // Define columns with enhanced styling and status indicators
   const columns = [
     columnHelper.accessor("name", {
@@ -95,10 +98,15 @@ export function DebtTable({
     }),
     columnHelper.accessor("type", {
       header: "Type",
+      size: -1,
+      minSize: -1,
+      maxSize: -1,
       cell: (info) => (
-        <Badge variant="outline" className="capitalize">
-          {info.getValue().replace("_", " ")}
-        </Badge>
+        <div className="flex justify-center">
+          <Badge variant="outline" className="capitalize">
+            {info.getValue().replace("_", " ")}
+          </Badge>
+        </div>
       ),
       enableSorting: false,
     }),
@@ -120,6 +128,39 @@ export function DebtTable({
       size: -1,
       minSize: -1,
       maxSize: -1,
+    }),
+    columnHelper.display({
+      id: "progress",
+      header: "Progress",
+      size: -1,
+      minSize: -1,
+      maxSize: -1,
+      cell: (info) => {
+        const debt = info.row.original;
+        const progress =
+          ((debt.originalBalance - debt.balance) / debt.originalBalance) * 100;
+        const progressClamped = Math.max(0, Math.min(100, progress));
+
+        return (
+          <div className="text-center">
+            <div className="flex flex-col gap-1">
+              <span className="text-contrast-high text-sm font-medium">
+                {progressClamped.toFixed(1)}%
+              </span>
+              <div className="progress-bar-dark h-2 w-full">
+                <div
+                  className="progress-bar-fill h-2"
+                  style={{ width: `${progressClamped}%` }}
+                />
+              </div>
+              <span className="text-contrast-medium text-xs">
+                {formatCurrency(debt.originalBalance - debt.balance)} paid
+              </span>
+            </div>
+          </div>
+        );
+      },
+      enableSorting: false,
     }),
     columnHelper.accessor("interestRate", {
       header: "Interest Rate",
@@ -185,7 +226,7 @@ export function DebtTable({
     }),
     columnHelper.display({
       id: "actions",
-      header: () => <div className="text-center"></div>,
+      header: () => <div className="text-center" />,
       cell: ({ row }) => {
         const debt = row.original;
         return (
@@ -301,9 +342,11 @@ export function DebtTable({
           </Button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border shadow-sm">
+        <div className="card-enhanced overflow-hidden">
           <Table>
-            <TableHeader className="bg-muted/30">{tableHeaders}</TableHeader>
+            <TableHeader className="table-header-enhanced">
+              {tableHeaders}
+            </TableHeader>
 
             <TableBody>
               {table.getRowModel().rows?.length ? (
@@ -314,13 +357,13 @@ export function DebtTable({
                   return (
                     <TableRow
                       key={row.id}
-                      className={cn(
-                        "hover:bg-muted/50 transition-colors",
-                        rowColorClass,
-                      )}
+                      className={cn("table-row-enhanced", rowColorClass)}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="py-4">
+                        <TableCell
+                          key={cell.id}
+                          className="table-cell-enhanced"
+                        >
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),
