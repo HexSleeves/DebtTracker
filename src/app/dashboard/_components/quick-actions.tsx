@@ -1,7 +1,8 @@
 "use client";
 
-import { CreditCard, DollarSign, Plus, TrendingUp } from "lucide-react";
+import { CreditCard, DollarSign, TrendingUp } from "lucide-react";
 import { useState } from "react";
+import DebtDialog from "~/components/dialogs/debt-dialog";
 import FloatingActionButton, {
   type ActionItem,
 } from "~/components/floating-action-button";
@@ -12,10 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import type { TCreateDebt } from "~/routers/debt/debt.schema";
 import type { TCreatePayment } from "~/routers/payment/payment.schema";
 import { api } from "~/trpc/react";
-import { DebtForm } from "./forms/debt-form";
 import { PaymentForm } from "./forms/payment-form";
 
 export function QuickActions() {
@@ -25,12 +24,6 @@ export function QuickActions() {
 
   const debts = api.debt.getAll.useQuery();
 
-  const createDebt = api.debt.create.useMutation({
-    onSuccess: () => {
-      setIsDebtDialogOpen(false);
-      void utils.debt.getAll.invalidate();
-    },
-  });
   const createPayment = api.payment.create.useMutation({
     onSuccess: () => {
       setIsLogPaymentDialogOpen(false);
@@ -38,9 +31,6 @@ export function QuickActions() {
     },
   });
 
-  const handleCreateDebt = (data: TCreateDebt) => {
-    createDebt.mutate(data);
-  };
   const handleLogPayment = (data: TCreatePayment) => {
     createPayment.mutate(data);
   };
@@ -77,26 +67,11 @@ export function QuickActions() {
       <FloatingActionButton actionItems={actionItems} />
 
       {/* Add Debt Dialog */}
-      <Dialog open={isDebtDialogOpen} onOpenChange={setIsDebtDialogOpen}>
-        <DialogContent className="border-l-primary from-primary-50/20 max-w-md border-l-4 bg-gradient-to-br to-transparent">
-          <DialogHeader>
-            <DialogTitle className="text-primary flex items-center gap-2">
-              <div className="bg-primary/10 rounded-full p-2">
-                <Plus className="h-5 w-5" />
-              </div>
-              Add New Debt
-            </DialogTitle>
-            <DialogDescription>
-              Enter the details of your debt to start tracking and optimizing
-              your payments.
-            </DialogDescription>
-          </DialogHeader>
-          <DebtForm
-            onSubmit={handleCreateDebt}
-            isLoading={createDebt.isPending}
-          />
-        </DialogContent>
-      </Dialog>
+      <DebtDialog
+        withTrigger={false}
+        isOpen={isDebtDialogOpen}
+        onOpenChange={setIsDebtDialogOpen}
+      />
 
       {/* Log Payment Dialog */}
       <Dialog

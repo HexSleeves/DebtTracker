@@ -33,4 +33,17 @@ export const paymentPlanRouter = createTRPCRouter({
   activate: protectedProcedure
     .input(schema.ZActivatePaymentPlan)
     .mutation(handler.activatePaymentPlan),
+
+  // Algorithm calculation endpoints
+  calculateStrategies: protectedProcedure
+    .input(schema.ZCalculateStrategies)
+    .query(handler.calculateStrategies),
+
+  calculateMetrics: protectedProcedure
+    .input(schema.ZCalculateMetrics)
+    .query(handler.calculateMetrics),
+
+  calculateBudgetImpact: protectedProcedure
+    .input(schema.ZCalculateBudgetImpact)
+    .mutation(handler.calculateBudgetImpactHandler),
 });

@@ -4,11 +4,12 @@ import {
   AlertTriangle,
   CheckCircle,
   CreditCard,
-  Plus,
   TrendingUp,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import DebtDialog from "~/components/dialogs/debt-dialog";
+import { DebtForm } from "~/components/forms/debt-form";
 import { StatCard } from "~/components/stats-card";
 import { Button } from "~/components/ui/button";
 import {
@@ -18,95 +19,35 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import { formatCurrency } from "~/lib/currency";
-import { useAuthGuard } from "~/lib/hooks/use-auth-guard";
 import type {
   TCreateDebt,
   TUpdateDebt,
 } from "~/server/api/routers/debt/debt.schema";
 import { api } from "~/trpc/react";
-import type { Debt } from "~/types/db.helpers";
+import type { Debt, TDebtStats } from "~/types/db.helpers";
 import { DebtTable } from "../_components/debt-table";
-import { DebtForm } from "../_components/forms/debt-form";
 
 export default function DebtsPage() {
-  const { user } = useAuthGuard();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebtId, setDeletingDebtId] = useState<string | null>(null);
 
   const utils = api.useUtils();
   const { data: debts = [], isLoading } = api.debt.getAll.useQuery();
-
-  // Calculate debt statistics
-  const debtStats = useMemo(() => {
-    const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
-    const totalAccounts = debts.length;
-    const paidDebts = debts.filter((debt) => debt.balance <= 0);
-    const overdueDebts = debts.filter(
-      (debt) => debt.dueDate && debt.dueDate < new Date() && debt.balance > 0,
-    );
-    const highInterestDebts = debts.filter(
-      (debt) => debt.interestRate >= 15 && debt.balance > 0,
-    );
-    const totalPaid = paidDebts.reduce(
-      (sum, debt) => sum + Math.abs(debt.balance),
-      0,
-    );
-    const totalOverdue = overdueDebts.reduce(
-      (sum, debt) => sum + debt.balance,
-      0,
-    );
-    const totalHighInterest = highInterestDebts.reduce(
-      (sum, debt) => sum + debt.balance,
-      0,
-    );
-
-    return {
-      totalDebt,
-      totalAccounts,
-      paidCount: paidDebts.length,
-      overdueCount: overdueDebts.length,
-      highInterestCount: highInterestDebts.length,
-      totalPaid,
-      totalOverdue,
-      totalHighInterest,
-    };
-  }, [debts]);
-
-  const createDebtMutation = api.debt.create.useMutation({
-    onMutate: async (newDebt) => {
-      await utils.debt.getAll.cancel();
-
-      const optimisticDebt = {
-        id: `temp-${Date.now()}`,
-        ...newDebt,
-        userId: user.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        dueDate: newDebt.dueDate ?? null,
-      };
-
-      return { optimisticDebt };
-    },
-    onSuccess: (_data, _variables, { optimisticDebt }) => {
-      utils.debt.getAll.setData(undefined, (old = []) => [
-        ...old,
-        optimisticDebt,
-      ]);
-
-      toast.success("Debt added successfully");
-      setIsAddDialogOpen(false);
-    },
-    onError: (error) => {
-      toast.error(`Failed to add debt: ${error.message}`);
-    },
-    onSettled: () => {
-      void utils.debt.getAll.invalidate();
-    },
-  });
+  const {
+    data: debtStats = {
+      totalDebt: 0,
+      totalAccounts: 0,
+      paidCount: 0,
+      overdueCount: 0,
+      highInterestCount: 0,
+      totalPaid: 0,
+      totalOverdue: 0,
+      totalHighInterest: 0,
+    } as TDebtStats,
+  } = api.debt.getStats.useQuery();
 
   const updateDebtMutation = api.debt.update.useMutation({
     onSuccess: (data, _variables) => {
@@ -139,10 +80,6 @@ export default function DebtsPage() {
       void utils.debt.getAll.invalidate();
     },
   });
-
-  const handleCreateDebt = (values: TCreateDebt) => {
-    createDebtMutation.mutate(values);
-  };
 
   const handleUpdateDebt = (values: TCreateDebt) => {
     if (!editingDebt) return;
@@ -196,29 +133,10 @@ export default function DebtsPage() {
           </p>
         </div>
 
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="interactive-primary hover-lift" size="lg">
-              <Plus className="mr-2 h-5 w-5" />
-              Add New Debt
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="border-l-primary border-l-4 sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-primary flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Add New Debt
-              </DialogTitle>
-              <DialogDescription>
-                Enter the details of your new debt to start tracking it.
-              </DialogDescription>
-            </DialogHeader>
-            <DebtForm
-              onSubmit={handleCreateDebt}
-              isLoading={createDebtMutation.isPending}
-            />
-          </DialogContent>
-        </Dialog>
+        <DebtDialog
+          isOpen={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+        />
       </div>
 
       {/* Statistics Cards */}

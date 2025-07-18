@@ -1,5 +1,16 @@
 import type { ProtectedTRPCContext } from "~/server/api/trpc";
 import {
+  calculateBudgetImpact,
+  calculateDebtToIncomeRatio,
+  calculateExtraPayment,
+  calculateTotalMinimumPayments,
+  calculateWeightedAverageInterestRate,
+  compareStrategies,
+  estimateMinimumPaymentTimeline,
+} from "~/server/lib/algorithms/calculator";
+import { calculateDebtAvalanche } from "~/server/lib/algorithms/debt-avalanche";
+import { calculateDebtSnowball } from "~/server/lib/algorithms/debt-snowball";
+import {
   type PaymentPlanUpdate,
   transformPaymentPlanFromDb,
 } from "~/types/db.helpers";
@@ -205,4 +216,108 @@ export async function activatePaymentPlan({
   }
 
   return transformPaymentPlanFromDb(plan);
+}
+
+// Algorithm calculation handlers
+export async function calculateStrategies({
+  input,
+}: HandlerInput<Schema.TCalculateStrategies>) {
+  const { debts, monthlyBudget, monthlyIncome } = input;
+
+  try {
+    const avalanche = calculateDebtAvalanche(debts, monthlyBudget);
+    const snowball = calculateDebtSnowball(debts, monthlyBudget);
+    const comparison = compareStrategies(debts, monthlyBudget);
+
+    // Calculate metrics
+    const totalMinimumPayments = calculateTotalMinimumPayments(debts);
+    const debtToIncomeRatio = monthlyIncome
+      ? calculateDebtToIncomeRatio(debts, monthlyIncome)
+      : null;
+    const weightedAverageInterestRate =
+      calculateWeightedAverageInterestRate(debts);
+    const extraPayment = calculateExtraPayment(debts, monthlyBudget);
+    const minimumPaymentTimeline = estimateMinimumPaymentTimeline(debts);
+
+    return {
+      avalanche,
+      snowball,
+      comparison,
+      metrics: {
+        totalMinimumPayments,
+        debtToIncomeRatio,
+        weightedAverageInterestRate,
+        extraPayment,
+        minimumPaymentTimeline,
+      },
+    };
+  } catch (error) {
+    throw new Error(
+      `Failed to calculate strategies: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
+export async function calculateMetrics({
+  input,
+}: HandlerInput<Schema.TCalculateMetrics>) {
+  const { debts, monthlyIncome } = input ?? {
+    debts: [],
+    monthlyIncome: 0,
+  };
+
+  try {
+    if (debts.length === 0) {
+      return {
+        totalDebt: 0,
+        totalMinimumPayments: 0,
+        debtToIncomeRatio: null,
+        weightedAverageInterestRate: 0,
+        highestInterestRate: 0,
+        lowestInterestRate: 0,
+        averageBalance: 0,
+      };
+    }
+
+    const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+    const totalMinimumPayments = calculateTotalMinimumPayments(debts);
+    const debtToIncomeRatio = monthlyIncome
+      ? calculateDebtToIncomeRatio(debts, monthlyIncome)
+      : null;
+    const weightedAverageInterestRate =
+      calculateWeightedAverageInterestRate(debts);
+    const interestRates = debts.map((debt) => debt.interestRate);
+    const highestInterestRate = Math.max(...interestRates);
+    const lowestInterestRate = Math.min(...interestRates);
+    const averageBalance = totalDebt / debts.length;
+
+    return {
+      totalDebt,
+      totalMinimumPayments,
+      debtToIncomeRatio,
+      weightedAverageInterestRate,
+      highestInterestRate,
+      lowestInterestRate,
+      averageBalance,
+    };
+  } catch (error) {
+    throw new Error(
+      `Failed to calculate metrics: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
+export async function calculateBudgetImpactHandler({
+  input,
+}: HandlerInput<Schema.TCalculateBudgetImpact>) {
+  const { debts, currentBudget, increasedBudget } = input;
+
+  try {
+    const impact = calculateBudgetImpact(debts, currentBudget, increasedBudget);
+    return impact;
+  } catch (error) {
+    throw new Error(
+      `Failed to calculate budget impact: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
 }

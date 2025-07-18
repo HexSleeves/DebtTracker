@@ -1,5 +1,5 @@
 import type { ProtectedTRPCContext } from "~/server/api/trpc";
-import type { DebtUpdate } from "~/types";
+import type { DebtUpdate, TDebtStats } from "~/types";
 import { transformDebtFromDb } from "~/types/db.helpers";
 import type * as Schema from "./debt.schema";
 
@@ -134,39 +134,46 @@ export async function deleteDebt({
   return { success: true };
 }
 
-export async function getDebtStats({ ctx }: HandlerCtx) {
+export async function getDebtStats({ ctx }: HandlerCtx): Promise<TDebtStats> {
   const { data: debts, error } = await ctx.supabase
     .from("debts")
-    .select("balance, interest_rate, minimum_payment")
+    .select("balance, interest_rate, minimum_payment, due_date")
     .eq("clerk_user_id", ctx.userId);
 
   if (error) {
     throw new Error(`Failed to fetch debt statistics: ${error.message}`);
   }
 
-  const totalBalance = debts.reduce(
-    (sum, debt) => sum + Number(debt.balance),
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const totalAccounts = debts.length;
+  const paidDebts = debts.filter((debt) => debt.balance <= 0);
+  const overdueDebts = debts.filter(
+    (debt) => debt.due_date && new Date(debt.due_date) < new Date() && debt.balance > 0,
+  );
+  const highInterestDebts = debts.filter(
+    (debt) => debt.interest_rate >= 15 && debt.balance > 0,
+  );
+  const totalPaid = paidDebts.reduce(
+    (sum, debt) => sum + Math.abs(debt.balance),
     0,
   );
-  const totalMinimumPayments = debts.reduce(
-    (sum, debt) => sum + Number(debt.minimum_payment),
+  const totalOverdue = overdueDebts.reduce(
+    (sum, debt) => sum + debt.balance,
     0,
   );
-  const averageInterestRate =
-    debts.length > 0
-      ? debts.reduce((sum, debt) => sum + Number(debt.interest_rate), 0) /
-        debts.length
-      : 0;
-  const highestInterestRate =
-    debts.length > 0
-      ? Math.max(...debts.map((debt) => Number(debt.interest_rate)))
-      : 0;
+  const totalHighInterest = highInterestDebts.reduce(
+    (sum, debt) => sum + debt.balance,
+    0,
+  );
 
   return {
-    totalDebts: debts.length,
-    totalBalance,
-    totalMinimumPayments,
-    averageInterestRate,
-    highestInterestRate,
+    totalDebt,
+    totalAccounts,
+    totalPaid,
+    totalOverdue,
+    totalHighInterest,
+    paidCount: paidDebts.length,
+    overdueCount: overdueDebts.length,
+    highInterestCount: highInterestDebts.length,
   };
 }

@@ -46,7 +46,7 @@ export function DashboardNav({
                     href={item.href}
                     className={cn(
                       pathname === item.href
-                        ? "border-l-primary/50 bg-primary text-primary-foreground border-l-4 shadow-sm"
+                        ? "border-l-primary/50 bg-primary text-secondary border-l-4 shadow-sm"
                         : "text-foreground hover:border-l-primary/20 hover:bg-accent hover:text-accent-foreground hover:border-l-4 hover:shadow-sm",
                       "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-all duration-200",
                     )}
@@ -55,10 +55,9 @@ export function DashboardNav({
                   >
                     <item.icon
                       className={cn(
-                        pathname === item.href
-                          ? "text-primary-foreground"
-                          : "text-muted-foreground group-hover:text-primary transition-colors",
-                        "h-6 w-6 shrink-0",
+                        "text-muted-foreground group-hover:text-primary h-6 w-6 shrink-0 transition-colors",
+                        pathname === item.href &&
+                          "text-secondary group-hover:text-secondary",
                       )}
                       aria-hidden="true"
                     />

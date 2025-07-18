@@ -163,3 +163,15 @@ export interface CreateUserInput {
   clerkUserId: string;
   email: string;
 }
+
+// Debt statistics type
+export interface TDebtStats {
+  totalDebt: number;
+  totalAccounts: number;
+  paidCount: number;
+  overdueCount: number;
+  highInterestCount: number;
+  totalPaid: number;
+  totalOverdue: number;
+  totalHighInterest: number;
+}

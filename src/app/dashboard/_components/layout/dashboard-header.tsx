@@ -51,7 +51,7 @@ export function DashboardHeader({ setSidebarOpen }: DashboardHeaderProps) {
 
           {/* Profile */}
           <UserButton
-            afterSignOutUrl="/"
+            // afterSignOutUrl="/"
             appearance={{
               elements: {
                 avatarBox: "w-8 h-8",

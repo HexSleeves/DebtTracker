@@ -22,12 +22,18 @@ A debt management and repayment optimization application built to help users tra
 - `bun run lighthouse` - Run Lighthouse performance audit
 - **IMPORTANT**: Run `bun run typecheck` after changes to ensure TypeScript compliance
 
+### Setup Commands
+
+- `./scripts/setup.sh` - Automated development environment setup (requires Bun)
+- `bun install` - Install dependencies
+
 ### Testing Commands
 
 - `bun test` - Run Jest test suite
 - `bun test --watch` - Run tests in watch mode
 - `bun test --coverage` - Run tests with coverage report
 - Test files: `src/**/__tests__/**/*.{test,spec}.{js,jsx,ts,tsx}` and `src/**/*.{test,spec}.{js,jsx,ts,tsx}`
+- **Note**: Jest setup file referenced in config but not yet created - tests may need initial setup
 
 ## Architecture Overview
 
