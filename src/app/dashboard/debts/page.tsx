@@ -135,7 +135,7 @@ export default function DebtsPage() {
 
 				<DebtDialog
 					isOpen={isAddDialogOpen}
-					onOpenChange={setIsAddDialogOpen}
+					onOpenChangeAction={setIsAddDialogOpen}
 				/>
 			</div>
 

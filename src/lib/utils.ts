@@ -49,7 +49,6 @@ export function getDebtStatusColor(status: DebtStatusType): string {
 			return "debt-warning";
 		case DebtStatus.PAID:
 			return "debt-paid";
-		case DebtStatus.IN_PAYMENT:
 		default:
 			return "debt-current";
 	}
@@ -63,7 +62,6 @@ export function getDebtStatusLabel(status: DebtStatusType): string {
 			return "High Interest";
 		case DebtStatus.PAID:
 			return "Paid Off";
-		case DebtStatus.IN_PAYMENT:
 		default:
 			return "In Payment";
 	}
@@ -78,7 +76,6 @@ export function getDebtRowColor(debt: Debt): string {
 			return "border-l-warning border-l-4 bg-warning-50/30";
 		case DebtStatus.PAID:
 			return "border-l-success border-l-4 bg-success-50/30";
-		case DebtStatus.IN_PAYMENT:
 		default:
 			return "border-l-info border-l-4 bg-info-50/20";
 	}

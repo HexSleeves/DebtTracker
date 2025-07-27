@@ -40,7 +40,7 @@
 	"typescript.preferences.importModuleSpecifier": "relative",
 	"typescript.updateImportsOnFileMove.enabled": "always",
 	"[typescriptreact]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
+		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"typescript.tsdk": "node_modules/typescript/lib"
 }
