@@ -10,6 +10,7 @@ export const env = createEnv({
 		NODE_ENV: z.enum(["development", "test", "production"]),
 		CLERK_SECRET_KEY: z.string(),
 		SUPABASE_SERVICE_ROLE_KEY: z.string(),
+		NEXT_PUBLIC_CONVEX_URL: z.string().optional(),
 	},
 
 	/**
@@ -21,6 +22,7 @@ export const env = createEnv({
 		// Supabase
 		NEXT_PUBLIC_SUPABASE_URL: z.string(),
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
+		NEXT_PUBLIC_CONVEX_URL: z.string().optional(),
 		// Clerk
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
 		// Clerk Redirect URLs (optional)
@@ -50,6 +52,7 @@ export const env = createEnv({
 		NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
 		SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+		NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

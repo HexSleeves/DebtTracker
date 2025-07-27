@@ -44,6 +44,7 @@
 		"babel-plugin-react-compiler": "^19.1.0-rc.2",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"convex": "^1.25.4",
 		"currency.js": "^2.0.4",
 		"date-fns": "^4.1.0",
 		"eslint-plugin-react-hooks": "6.0.0-rc.1",

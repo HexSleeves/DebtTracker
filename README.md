@@ -29,7 +29,7 @@ This project is not only a practical tool but also a showcase of modern web deve
 - **UI:** [shadcn/ui](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com/), and [Recharts](httpss://recharts.org/)
 - **API Layer:** [tRPC](https://trpc.io/) for type-safe client-server communication
 - **Authentication:** [Clerk](https://clerk.com/)
-- **Database:** [Supabase](https://supabase.com/) (PostgreSQL)
+- **Database:** [Convex](https://convex.dev/) (migration from [Supabase](https://supabase.com/) in progress)
 - **Form Management:** [React Hook Form](https://react-hook-form.com/) with [Zod](https://zod.dev/)
 - **Linting & Formatting:** [Biome](https://biomejs.dev/) and [Prettier](https://prettier.io/)
 
@@ -63,6 +63,8 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+# Convex (Optional)
+NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 ```
 
 ### Installation
@@ -94,6 +96,10 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 - [shadcn](https://github.com/shadcn) for the amazing UI components.
 - The [tRPC](https://trpc.io/) team for making type-safe APIs a breeze.
 - The [Clerk](https://clerk.com/) and [Supabase](https://supabase.com/) teams for their excellent services.
+
+## 📦 Migrating to Convex
+
+Work is underway to replace the Supabase database with [Convex](https://convex.dev/). See [docs/convex-migration.md](./docs/convex-migration.md) for progress.
 
 ## 👨‍💻 Contributors
 
