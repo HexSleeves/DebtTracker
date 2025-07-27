@@ -551,8 +551,8 @@ export default function StrategiesPage() {
 										fill="#8884d8"
 										dataKey="balance"
 									>
-										{debtCompositionData.map((entry, index) => (
-											<Cell key={`cell-${index}`} fill={entry.color} />
+										{debtCompositionData.map((entry) => (
+											<Cell key={entry.name} fill={entry.color} />
 										))}
 									</Pie>
 									<Tooltip

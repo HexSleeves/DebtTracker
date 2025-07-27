@@ -70,7 +70,7 @@ export function QuickActions() {
 			<DebtDialog
 				withTrigger={false}
 				isOpen={isDebtDialogOpen}
-				onOpenChange={setIsDebtDialogOpen}
+				onOpenChangeAction={setIsDebtDialogOpen}
 			/>
 
 			{/* Log Payment Dialog */}
