@@ -83,11 +83,11 @@ This application will be a modern, type-safe, full-stack web application.
 
 - **Framework:** **Next.js (with App Router)** for a robust, server-rendered React application structure.
 - **UI Components:** **shadcn/ui** will be used for a clean, accessible, and customizable component library built on Tailwind CSS.
-- **API Layer:** **tRPC** will be used to create fully type-safe APIs between the client and server, eliminating the need for manual API contract management.
+- **API Layer:** **Convex Functions** will be used to create fully type-safe APIs between the client and server, eliminating the need for manual API contract management.
 - **Authentication:** **Clerk** will manage all aspects of user authentication, including sign-up/sign-in flows, session management, and user profile data.
-- **Form Management:** **React Hook Form** will be used for creating performant and maintainable forms for all user inputs.
-- **Database ORM:** **Supabase** will be used as the ORM for type-safe database access.
-- **Database:** **Supabase** (or similar relational database) hosted on a secure cloud provider.
+- **Form Management:** **Tanstack Form** will be used for creating performant and maintainable forms for all user inputs.
+- **Database ORM:** **Convex** will be used as the ORM for type-safe database access.
+- **Database:** **Convex** (or similar relational database) hosted on a secure cloud provider.
 - **Bank Integration API:** **Plaid** will be integrated to provide secure connections to user bank accounts for automated transaction tracking.
 
 ### 6. Success Metrics
