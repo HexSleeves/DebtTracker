@@ -9,8 +9,8 @@ export const env = createEnv({
 	server: {
 		NODE_ENV: z.enum(["development", "test", "production"]),
 		CLERK_SECRET_KEY: z.string(),
+		CLERK_JWT_ISSUER_DOMAIN: z.string(),
 		SUPABASE_SERVICE_ROLE_KEY: z.string(),
-		NEXT_PUBLIC_CONVEX_URL: z.string().optional(),
 	},
 
 	/**
@@ -22,7 +22,7 @@ export const env = createEnv({
 		// Supabase
 		NEXT_PUBLIC_SUPABASE_URL: z.string(),
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
-		NEXT_PUBLIC_CONVEX_URL: z.string().optional(),
+		NEXT_PUBLIC_CONVEX_URL: z.string(),
 		// Clerk
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
 		// Clerk Redirect URLs (optional)
@@ -40,6 +40,7 @@ export const env = createEnv({
 		NODE_ENV: process.env.NODE_ENV,
 		// Clerk
 		CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+		CLERK_JWT_ISSUER_DOMAIN: process.env.CLERK_JWT_ISSUER_DOMAIN,
 		NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
 			process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
 		NEXT_PUBLIC_CLERK_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,

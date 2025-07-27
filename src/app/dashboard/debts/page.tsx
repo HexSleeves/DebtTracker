@@ -6,7 +6,7 @@ import {
 	CreditCard,
 	TrendingUp,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import DebtDialog from "~/components/dialogs/debt-dialog";
 import { DebtForm } from "~/components/forms/debt-form";
@@ -36,6 +36,7 @@ export default function DebtsPage() {
 
 	const utils = api.useUtils();
 	const { data: debts = [], isLoading } = api.debt.getAll.useQuery();
+
 	const {
 		data: debtStats = {
 			totalDebt: 0,
@@ -95,6 +96,16 @@ export default function DebtsPage() {
 	const handleDeleteDebt = (id: string) => {
 		deleteDebtMutation.mutate({ id });
 	};
+
+	useEffect(() => {
+		const fetchDebts = async () => {
+			const res = await fetch("/api/debts");
+			const data = (await res.json()) as Debt[];
+			console.log(data);
+		};
+
+		void fetchDebts();
+	}, []);
 
 	if (isLoading) {
 		return (
