@@ -27,6 +27,44 @@ export type Database = {
 	};
 	public: {
 		Tables: {
+			debt_milestones: {
+				Row: {
+					achieved_date: string;
+					created_at: string;
+					debt_id: string;
+					description: string | null;
+					id: string;
+					milestone_type: string;
+					milestone_value: number;
+				};
+				Insert: {
+					achieved_date?: string;
+					created_at?: string;
+					debt_id: string;
+					description?: string | null;
+					id?: string;
+					milestone_type: string;
+					milestone_value: number;
+				};
+				Update: {
+					achieved_date?: string;
+					created_at?: string;
+					debt_id?: string;
+					description?: string | null;
+					id?: string;
+					milestone_type?: string;
+					milestone_value?: number;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "debt_milestones_debt_id_fkey";
+						columns: ["debt_id"];
+						isOneToOne: false;
+						referencedRelation: "debts";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			debts: {
 				Row: {
 					balance: number;
@@ -38,6 +76,10 @@ export type Database = {
 					minimum_payment: number;
 					name: string;
 					original_balance: number;
+					paid_off_date: string | null;
+					status: string;
+					total_interest_paid: number;
+					total_payments_made: number;
 					type: string;
 					updated_at: string | null;
 				};
@@ -51,6 +93,10 @@ export type Database = {
 					minimum_payment: number;
 					name: string;
 					original_balance: number;
+					paid_off_date?: string | null;
+					status?: string;
+					total_interest_paid?: number;
+					total_payments_made?: number;
 					type: string;
 					updated_at?: string | null;
 				};
@@ -64,6 +110,10 @@ export type Database = {
 					minimum_payment?: number;
 					name?: string;
 					original_balance?: number;
+					paid_off_date?: string | null;
+					status?: string;
+					total_interest_paid?: number;
+					total_payments_made?: number;
 					type?: string;
 					updated_at?: string | null;
 				};
@@ -108,29 +158,97 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			payment_recommendations: {
+				Row: {
+					clerk_user_id: string;
+					created_at: string;
+					debt_id: string | null;
+					description: string;
+					expires_at: string | null;
+					id: string;
+					is_applied: boolean;
+					priority: string;
+					reasoning: string;
+					recommendation_type: string;
+					recommended_amount: number;
+					title: string;
+				};
+				Insert: {
+					clerk_user_id: string;
+					created_at?: string;
+					debt_id?: string | null;
+					description: string;
+					expires_at?: string | null;
+					id?: string;
+					is_applied?: boolean;
+					priority?: string;
+					reasoning: string;
+					recommendation_type: string;
+					recommended_amount: number;
+					title: string;
+				};
+				Update: {
+					clerk_user_id?: string;
+					created_at?: string;
+					debt_id?: string | null;
+					description?: string;
+					expires_at?: string | null;
+					id?: string;
+					is_applied?: boolean;
+					priority?: string;
+					reasoning?: string;
+					recommendation_type?: string;
+					recommended_amount?: number;
+					title?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "payment_recommendations_debt_id_fkey";
+						columns: ["debt_id"];
+						isOneToOne: false;
+						referencedRelation: "debts";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			payments: {
 				Row: {
 					amount: number;
+					balance_after_payment: number | null;
 					created_at: string | null;
 					debt_id: string;
 					id: string;
+					interest_portion: number;
+					notes: string | null;
 					payment_date: string;
+					payment_method: string;
+					principal_portion: number;
 					type: string;
 				};
 				Insert: {
 					amount: number;
+					balance_after_payment?: number | null;
 					created_at?: string | null;
 					debt_id: string;
 					id?: string;
+					interest_portion?: number;
+					notes?: string | null;
 					payment_date: string;
+					payment_method?: string;
+					principal_portion?: number;
 					type: string;
 				};
 				Update: {
 					amount?: number;
+					balance_after_payment?: number | null;
 					created_at?: string | null;
 					debt_id?: string;
 					id?: string;
+					interest_portion?: number;
+					notes?: string | null;
 					payment_date?: string;
+					payment_method?: string;
+					principal_portion?: number;
 					type?: string;
 				};
 				Relationships: [
@@ -146,9 +264,43 @@ export type Database = {
 		};
 		Views: Record<never, never>;
 		Functions: {
+			calculate_debt_progress: {
+				Args: {
+					debt_id_param: string;
+				};
+				Returns: number;
+			};
+			calculate_payment_breakdown: {
+				Args: {
+					debt_id_param: string;
+					payment_amount: number;
+					payment_date?: string;
+				};
+				Returns: {
+					interest_portion: number;
+					principal_portion: number;
+				}[];
+			};
+			detect_and_create_milestones: {
+				Args: {
+					debt_id_param: string;
+				};
+				Returns: undefined;
+			};
 			get_current_user_id: {
 				Args: Record<PropertyKey, never>;
 				Returns: string;
+			};
+			process_payment_and_update_debt: {
+				Args: {
+					debt_id_param: string;
+					payment_amount: number;
+					payment_date?: string;
+				};
+				Returns: {
+					new_balance: number;
+					milestones_triggered: number;
+				}[];
 			};
 		};
 		Enums: Record<never, never>;

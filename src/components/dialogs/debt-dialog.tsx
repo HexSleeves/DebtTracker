@@ -42,6 +42,10 @@ export default function DebtDialog({
 				updatedAt: new Date(),
 				dueDate: newDebt.dueDate ?? null,
 				originalBalance: newDebt.originalBalance ?? newDebt.balance,
+				status: "active" as const,
+				paidOffDate: null,
+				totalInterestPaid: 0,
+				totalPaymentsMade: 0,
 			};
 
 			return { optimisticDebt };
