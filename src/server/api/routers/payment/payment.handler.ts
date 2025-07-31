@@ -1,6 +1,11 @@
+import { applyPayment } from "~/lib/payments/processor";
+import { detectMilestones } from "~/lib/progress/tracker";
 import type { ProtectedTRPCContext } from "~/server/api/trpc";
 import type { PaymentInsert, PaymentUpdate } from "~/types";
-import { transformPaymentFromDb } from "~/types/db.helpers";
+import {
+	transformDebtFromDb,
+	transformPaymentFromDb,
+} from "~/types/db.helpers";
 import type * as Schema from "./payment.schema";
 
 type HandlerCtx = {
@@ -71,7 +76,7 @@ export async function createPayment({
 	// Verify the debt belongs to the user
 	const { data: debt } = await ctx.supabase
 		.from("debts")
-		.select("id, balance")
+		.select("*")
 		.eq("id", input.debtId)
 		.eq("clerk_user_id", ctx.userId)
 		.single();
@@ -90,11 +95,35 @@ export async function createPayment({
 		throw new Error("Invalid payment date");
 	}
 
+	// Calculate breakdown and new balance
+	const lastPayment = await ctx.supabase
+		.from("payments")
+		.select("payment_date")
+		.eq("debt_id", input.debtId)
+		.order("payment_date", { ascending: false })
+		.limit(1)
+		.maybeSingle();
+
+	const { newBalance, breakdown } = applyPayment(
+		transformDebtFromDb(debt),
+		{ amount: input.amount, paymentDate: input.paymentDate },
+		{
+			lastPaymentDate: lastPayment.data?.payment_date
+				? new Date(lastPayment.data.payment_date)
+				: undefined,
+		},
+	);
+
 	const insertData: PaymentInsert = {
 		debt_id: input.debtId,
 		amount: input.amount,
 		payment_date: paymentDateString,
 		type: input.type,
+		balance_after_payment: newBalance,
+		interest_portion: breakdown.interestPortion,
+		principal_portion: breakdown.principalPortion,
+		payment_method: input.paymentMethod ?? "manual",
+		notes: input.notes ?? null,
 	};
 
 	const { data: payment, error } = await ctx.supabase
@@ -103,16 +132,36 @@ export async function createPayment({
 		.select("*")
 		.single();
 
-	if (error) {
-		throw new Error(`Failed to create payment: ${error.message}`);
+	if (error || !payment) {
+		throw new Error(`Failed to create payment: ${error?.message}`);
 	}
 
-	// Update debt balance if this is a payment
-	const newBalance = Math.max(0, Number(debt.balance) - input.amount);
 	await ctx.supabase
 		.from("debts")
-		.update({ balance: newBalance })
+		.update({
+			balance: newBalance,
+			total_interest_paid:
+				Number(debt.total_interest_paid) + breakdown.interestPortion,
+			total_payments_made: Number(debt.total_payments_made) + input.amount,
+			status: newBalance === 0 ? "paid_off" : debt.status,
+			paid_off_date:
+				newBalance === 0 ? new Date().toISOString() : debt.paid_off_date,
+		})
 		.eq("id", input.debtId);
+
+	const triggered = detectMilestones(
+		transformDebtFromDb(debt),
+		transformPaymentFromDb(payment),
+	);
+	for (const m of triggered) {
+		await ctx.supabase.from("debt_milestones").insert({
+			debt_id: m.debtId,
+			milestone_type: m.milestoneType,
+			achieved_date: m.achievedDate.toISOString(),
+			milestone_value: m.milestoneValue,
+			description: m.description,
+		});
+	}
 
 	return transformPaymentFromDb(payment);
 }
@@ -128,8 +177,7 @@ export async function updatePayment({
 			`
         *,
         debts!inner(
-          id,
-          balance,
+          *,
           clerk_user_id
         )
       `,
@@ -156,6 +204,12 @@ export async function updatePayment({
 	if (updateData.type !== undefined) {
 		dbUpdateData.type = updateData.type;
 	}
+	if (updateData.paymentMethod !== undefined) {
+		dbUpdateData.payment_method = updateData.paymentMethod;
+	}
+	if (updateData.notes !== undefined) {
+		dbUpdateData.notes = updateData.notes;
+	}
 
 	const { data: payment, error } = await ctx.supabase
 		.from("payments")
@@ -168,11 +222,23 @@ export async function updatePayment({
 		throw new Error(`Failed to update payment: ${error.message}`);
 	}
 
-	// If amount changed, update debt balance
+	// If amount changed, recalc breakdown and update debt
 	if (updateData.amount !== undefined) {
-		const amountDifference = updateData.amount - Number(existingPayment.amount);
-		const currentBalance = Number(existingPayment.debts.balance);
-		const newBalance = Math.max(0, currentBalance + amountDifference);
+		const debt = transformDebtFromDb(existingPayment.debts);
+
+		const { newBalance, breakdown } = applyPayment(debt, {
+			amount: updateData.amount,
+			paymentDate: updateData.paymentDate ?? new Date(),
+		});
+
+		await ctx.supabase
+			.from("payments")
+			.update({
+				balance_after_payment: newBalance,
+				interest_portion: breakdown.interestPortion,
+				principal_portion: breakdown.principalPortion,
+			})
+			.eq("id", id);
 
 		if (existingPayment.debt_id) {
 			await ctx.supabase
@@ -222,13 +288,21 @@ export async function deletePayment({
 		throw new Error(`Failed to delete payment: ${error.message}`);
 	}
 
-	// Restore the debt balance
+	// Restore the debt balance and totals
 	const restoredBalance =
 		Number(payment.debts.balance) + Number(payment.amount);
 	if (payment.debt_id) {
 		await ctx.supabase
 			.from("debts")
-			.update({ balance: restoredBalance })
+			.update({
+				balance: restoredBalance,
+				total_interest_paid:
+					Number(payment.debts.total_interest_paid ?? 0) -
+					Number(payment.interest_portion ?? 0),
+				total_payments_made:
+					Number(payment.debts.total_payments_made ?? 0) -
+					Number(payment.amount),
+			})
 			.eq("id", payment.debt_id);
 	}
 

@@ -118,6 +118,8 @@ export default function PaymentsPage() {
 			amount: formData.amount,
 			paymentDate: formData.paymentDate,
 			type: formData.type,
+			paymentMethod: formData.paymentMethod,
+			notes: formData.notes,
 		};
 
 		createPaymentMutation.mutate(createData);
