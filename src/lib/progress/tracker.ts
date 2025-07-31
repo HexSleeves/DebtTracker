@@ -22,9 +22,11 @@ export function calculateProgress(
 
 	let paymentVelocity = 0;
 	if (payments.length > 1) {
+		const firstPaymentDate = payments[payments.length - 1]?.paymentDate ?? new Date();
+		const lastPaymentDate = payments[0]?.paymentDate ?? new Date();
 		const months = Math.max(
 			1,
-			differenceInMonths(new Date(), payments[0]?.paymentDate ?? new Date()),
+			differenceInMonths(lastPaymentDate, firstPaymentDate),
 		);
 		paymentVelocity = payments.length / months;
 	} else if (payments.length === 1) {
