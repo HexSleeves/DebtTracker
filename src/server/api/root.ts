@@ -2,6 +2,8 @@ import { debtRouter } from "~/server/api/routers/debt/_router";
 import { paymentRouter } from "~/server/api/routers/payment/_router";
 import { paymentPlanRouter } from "~/server/api/routers/paymentPlan/_router";
 import { postRouter } from "~/server/api/routers/post";
+import { progressRouter } from "~/server/api/routers/progress/_router";
+import { recommendationRouter } from "~/server/api/routers/recommendation/_router";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -13,6 +15,8 @@ export const appRouter = createTRPCRouter({
 	debt: debtRouter,
 	payment: paymentRouter,
 	paymentPlan: paymentPlanRouter,
+	progress: progressRouter,
+	recommendation: recommendationRouter,
 	post: postRouter,
 });
 

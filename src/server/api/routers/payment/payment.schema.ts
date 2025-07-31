@@ -6,6 +6,8 @@ export const ZCreatePayment = z.object({
 	amount: z.number().min(0.01, "Payment amount must be greater than 0"),
 	paymentDate: z.date(),
 	type: z.enum(["minimum", "extra", "full"]),
+	paymentMethod: z.enum(["manual", "automatic", "recommended"]).optional(),
+	notes: z.string().optional(),
 });
 export type TCreatePayment = z.infer<typeof ZCreatePayment>;
 
@@ -18,6 +20,8 @@ export const ZUpdatePayment = z.object({
 		.optional(),
 	paymentDate: z.date().optional(),
 	type: z.enum(["minimum", "extra", "full"]).optional(),
+	paymentMethod: z.enum(["manual", "automatic", "recommended"]).optional(),
+	notes: z.string().optional(),
 });
 
 export type TUpdatePayment = z.infer<typeof ZUpdatePayment>;
